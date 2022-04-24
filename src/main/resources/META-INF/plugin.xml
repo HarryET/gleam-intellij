@@ -4,8 +4,9 @@
     <name>Gleam Language</name>
 
     <vendor
-    url="https://harryet.xyz"
-    email="intellij@harryet.xyz">Harry Bairstow</vendor>
+            url="https://harryet.xyz"
+            email="intellij@harryet.xyz">Harry Bairstow
+    </vendor>
 
     <depends>com.intellij.modules.platform</depends>
 
