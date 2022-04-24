@@ -19,6 +19,9 @@ plugins {
 group = properties("pluginGroup")
 version = properties("pluginVersion")
 
+// Add generated code to the source
+sourceSets["main"].java.srcDirs("src/main/gen")
+
 // Configure project's dependencies
 repositories {
     mavenCentral()
