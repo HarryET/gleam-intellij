@@ -12,10 +12,41 @@
     elementTypeHolderClass="run.gleam.lang.core.psi.GleamTypes"
     elementTypeClass="run.gleam.lang.core.psi.GleamElementType"
     tokenTypeClass="run.gleam.lang.core.psi.GleamTokenType"
+
+    tokens = [
+        LBRACE      =  '{'
+        RBRACE      =  '}'
+        LBRACK      =  '['
+        RBRACK      =  ']'
+        LPAREN      =  '('
+        RPAREN      =  ')'
+        COLON       =  ':'
+        SEMICOLON   =  ';'
+        COMMA       =  ','
+        EQ          =  '='
+        BANGEQ      =  '!='
+        EQEQ        =  '=='
+        BANG        =  '!'
+        PLUSEQ      =  '+='
+        PLUS        =  '+'
+        MINUSEQ     =  '-='
+        MINUS       =  '-'
+        OR          =  '||'
+        LT          =  '<'
+        MUL         =  '*'
+        DIV         =  '/'
+        DIVDIV      =  '//'
+        GT          =  '>'
+        DOTDOT      =  '..'
+        FAT_ARROW   =  '=>'
+        ARROW       =  '->'
+        Q           =  '?'
+    ]
 }
 
-simpleFile ::= item_*
+gleamFile ::= statement*
 
-private item_ ::= (property|COMMENT|CRLF)
+statement ::= import | comment
 
-property ::= (KEY? SEPARATOR VALUE?) | KEY
+import ::= "import"
+comment ::= DIVDIV (ALPHA | WSP)*

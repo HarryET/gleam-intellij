@@ -30,11 +30,35 @@ WHITE_SPACE=\s+
 <YYINITIAL> {
   {WHITE_SPACE}      { return WHITE_SPACE; }
 
-  "COMMENT"          { return COMMENT; }
-  "CRLF"             { return CRLF; }
-  "KEY"              { return KEY; }
-  "SEPARATOR"        { return SEPARATOR; }
-  "VALUE"            { return VALUE; }
+  "{"                { return LBRACE; }
+  "}"                { return RBRACE; }
+  "["                { return LBRACK; }
+  "]"                { return RBRACK; }
+  "("                { return LPAREN; }
+  ")"                { return RPAREN; }
+  ":"                { return COLON; }
+  ";"                { return SEMICOLON; }
+  ","                { return COMMA; }
+  "="                { return EQ; }
+  "!="               { return BANGEQ; }
+  "=="               { return EQEQ; }
+  "!"                { return BANG; }
+  "+="               { return PLUSEQ; }
+  "+"                { return PLUS; }
+  "-="               { return MINUSEQ; }
+  "-"                { return MINUS; }
+  "||"               { return OR; }
+  "<"                { return LT; }
+  "*"                { return MUL; }
+  "/"                { return DIV; }
+  "//"               { return DIVDIV; }
+  ">"                { return GT; }
+  ".."               { return DOTDOT; }
+  "=>"               { return FAT_ARROW; }
+  "->"               { return ARROW; }
+  "?"                { return Q; }
+  "ALPHA"            { return ALPHA; }
+  "WSP"              { return WSP; }
 
 
 }
