@@ -57,8 +57,9 @@ WHITE_SPACE=\s+
   "=>"               { return FAT_ARROW; }
   "->"               { return ARROW; }
   "?"                { return Q; }
-  "ALPHA"            { return ALPHA; }
-  "WSP"              { return WSP; }
+  "\""               { return QUOTE; }
+  "CR"               { return CR; }
+  "CRLF"             { return CRLF; }
 
 
 }

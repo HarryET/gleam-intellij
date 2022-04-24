@@ -41,12 +41,17 @@
         FAT_ARROW   =  '=>'
         ARROW       =  '->'
         Q           =  '?'
+        QUOTE       =  '"'
     ]
 }
 
 gleamFile ::= statement*
 
-statement ::= import | comment
+statement ::= comment
 
-import ::= "import"
-comment ::= DIVDIV (ALPHA | WSP)*
+comment ::= "//" (<<parseComment>>)*
+
+keyword ::= "pub" | "fn" | "let" | "case" | "import" | "type" | "try" | "assert" | "todo" | "const" | "external"
+
+string_literal ::= QUOTE (<<parseString>>)* QUOTE
+EOL ::= CR | CRLF

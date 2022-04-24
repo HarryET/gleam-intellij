@@ -18,5 +18,10 @@
                   fieldName="INSTANCE"/>
 
         <lang.parserDefinition language="Gleam" implementationClass="run.gleam.lang.core.parser.GleamParserDefinition"/>
+
+        <lang.syntaxHighlighter language="Gleam"
+                                implementationClass="run.gleam.ide.highlight.GleamHighlighter"/>
+
+        <colorSettingsPage implementation="run.gleam.ide.colors.GleamColorSettingsPage"/>
     </extensions>
 </idea-plugin>
