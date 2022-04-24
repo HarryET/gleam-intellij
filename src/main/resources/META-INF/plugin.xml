@@ -8,4 +8,12 @@
     email="intellij@harryet.xyz">Harry Bairstow</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="Gleam"
+                  language="Gleam"
+                  implementationClass="run.gleam.lang.GleamFileType"
+                  extensions="gleam"
+                  fieldName="INSTANCE"/>
+    </extensions>
 </idea-plugin>
