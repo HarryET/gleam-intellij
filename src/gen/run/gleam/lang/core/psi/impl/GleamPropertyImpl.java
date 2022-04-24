@@ -1,5 +1,5 @@
 // This is a generated file. Not intended for manual editing.
-package run.gleam.psi.impl;
+package run.gleam.lang.core.psi.impl;
 
 import java.util.List;
 import org.jetbrains.annotations.*;
@@ -7,9 +7,9 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static run.gleam.psi.GleamTypes.*;
+import static run.gleam.lang.core.psi.GleamTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
-import run.gleam.psi.*;
+import run.gleam.lang.core.psi.*;
 
 public class GleamPropertyImpl extends ASTWrapperPsiElement implements GleamProperty {
 

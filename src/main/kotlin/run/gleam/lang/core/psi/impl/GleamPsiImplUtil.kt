@@ -1,9 +1,8 @@
-package run.gleam.psi.impl
+package run.gleam.lang.core.psi.impl
 
 import com.intellij.lang.ASTNode
-import run.gleam.psi.GleamProperty
-import run.gleam.psi.GleamTypes
-
+import run.gleam.lang.core.psi.GleamProperty
+import run.gleam.lang.core.psi.GleamTypes
 
 object SimplePsiImplUtil {
     fun getKey(element: GleamProperty): String? {

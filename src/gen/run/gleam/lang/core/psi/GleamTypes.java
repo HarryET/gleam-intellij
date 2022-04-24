@@ -1,10 +1,10 @@
 // This is a generated file. Not intended for manual editing.
-package run.gleam.psi;
+package run.gleam.lang.core.psi;
 
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
-import run.gleam.psi.impl.*;
+import run.gleam.lang.core.psi.impl.*;
 
 public interface GleamTypes {
 

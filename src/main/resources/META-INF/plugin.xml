@@ -16,5 +16,7 @@
                   implementationClass="run.gleam.lang.GleamFileType"
                   extensions="gleam"
                   fieldName="INSTANCE"/>
+
+        <lang.parserDefinition language="Gleam" implementationClass="run.gleam.lang.core.parser.GleamParserDefinition"/>
     </extensions>
 </idea-plugin>

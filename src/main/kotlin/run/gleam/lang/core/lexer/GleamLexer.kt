@@ -1,4 +1,4 @@
-package run.gleam.lang
+package run.gleam.lang.core.lexer
 
 import com.intellij.lexer.FlexAdapter
 

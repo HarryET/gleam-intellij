@@ -1,0 +1,21 @@
+{
+    parserClass='run.gleam.lang.core.parser.GleamParser'
+    parserUtilClass='run.gleam.lang.core.parser.GleamParserUtil'
+
+    extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+    psiClassPrefix="Gleam"
+    psiImplClassSuffix="Impl"
+    psiPackage="run.gleam.lang.core.psi"
+    psiImplPackage="run.gleam.lang.core.psi.impl"
+
+    elementTypeHolderClass="run.gleam.lang.core.psi.GleamTypes"
+    elementTypeClass="run.gleam.lang.core.psi.GleamElementType"
+    tokenTypeClass="run.gleam.lang.core.psi.GleamTokenType"
+}
+
+simpleFile ::= item_*
+
+private item_ ::= (property|COMMENT|CRLF)
+
+property ::= (KEY? SEPARATOR VALUE?) | KEY

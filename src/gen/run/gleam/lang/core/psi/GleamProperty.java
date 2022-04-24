@@ -1,5 +1,5 @@
 // This is a generated file. Not intended for manual editing.
-package run.gleam.psi;
+package run.gleam.lang.core.psi;
 
 import java.util.List;
 import org.jetbrains.annotations.*;
