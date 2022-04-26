@@ -21,7 +21,6 @@ class GleamColorSettingsPage : ColorSettingsPage {
     companion object {
         private val ATTRS: Array<AttributesDescriptor> = GleamColor.values().map { it.attributesDescriptor }.toTypedArray()
 
-        // This tags should be kept in sync with RsHighlightingAnnotator highlighting logic
         private val ANNOTATOR_TAGS: Map<String, TextAttributesKey> = GleamColor.values().associateBy({ it.name }, { it.textAttributesKey })
 
         private val DEMO_TEXT: String by lazy {

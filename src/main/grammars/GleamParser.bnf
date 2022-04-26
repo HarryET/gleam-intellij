@@ -14,44 +14,83 @@
     tokenTypeClass="run.gleam.lang.core.psi.GleamTokenType"
 
     tokens = [
+        // Keywords
+        PUB = "pub"
+        FN = "fn"
+        LET = "fet"
+        CASE = "case"
+        IMPORT = "import"
+        TYPE = "type"
+        ASSERT = "assert"
+        TODO = "todo"
+        CONST = "const"
+        EXTERNAL = "external"
+
+        // Regexp
+        IDENTIFIER = "regexp:[_a-z][_0-9a-z]*"
+        COMMENT = "regexp://[^\n]*"
+        TYPE_IDENTIFIER = "regexp:[A-Z][_0-9a-zA-Z]*"
+
+        // Chars
         LBRACE      =  '{'
         RBRACE      =  '}'
         LBRACK      =  '['
         RBRACK      =  ']'
         LPAREN      =  '('
         RPAREN      =  ')'
+
         COLON       =  ':'
-        SEMICOLON   =  ';'
+
         COMMA       =  ','
+
         EQ          =  '='
-        BANGEQ      =  '!='
         EQEQ        =  '=='
+
         BANG        =  '!'
-        PLUSEQ      =  '+='
+
         PLUS        =  '+'
-        MINUSEQ     =  '-='
         MINUS       =  '-'
+
         OR          =  '||'
+        AND         =  '&&'
+
         LT          =  '<'
+        GT          =  '>'
+
         MUL         =  '*'
         DIV         =  '/'
         DIVDIV      =  '//'
-        GT          =  '>'
+
+        DOT         =  '.'
         DOTDOT      =  '..'
+
         FAT_ARROW   =  '=>'
         ARROW       =  '->'
-        Q           =  '?'
+
         QUOTE       =  '"'
     ]
 }
 
-gleamFile ::= statement*
+gleamFile ::= topLevelDefinition*
+private topLevelDefinition ::=
+    importStatement
+    | typeStatement
+    | functionStatement
+    | COMMENT
 
-statement ::= comment
+private innerDefinition ::=
+    COMMENT
 
-comment ::= "//" (<<parseComment>>)*
+private constructorElement ::= constructorIdentifier TYPE_IDENTIFIER [COMMA]
+constructorIdentifier ::= IDENTIFIER COLON
 
-keyword ::= "pub" | "fn" | "let" | "case" | "import" | "type" | "try" | "assert" | "todo" | "const" | "external"
+importStatement ::= IMPORT importStatementElement
+importStatementElement ::= IDENTIFIER ('/' IDENTIFIER [importStatementTypes])*
+importStatementTypes ::= DOT LBRACE ((TYPE_IDENTIFIER|IDENTIFIER) [COMMA])* RBRACE
 
-string_literal ::= QUOTE (<<parseString>>)* QUOTE
-EOL ::= CR | CRLF
+// TODO improve type statement parsing
+typeStatement ::= [PUB] TYPE TYPE_IDENTIFIER LBRACE (typeStatementConstructor)* RBRACE
+typeStatementConstructor ::= TYPE_IDENTIFIER LPAREN (constructorElement)* RPAREN
+
+functionStatement ::= [PUB] FN IDENTIFIER LPAREN [(constructorElement)*] RPAREN [functionStatementType] LBRACE [innerDefinition*] RBRACE
+functionStatementType ::= ARROW TYPE_IDENTIFIER

@@ -25,42 +25,53 @@ import static run.gleam.lang.core.psi.GleamTypes.*;
 EOL=\R
 WHITE_SPACE=\s+
 
+IDENTIFIER=[_a-z][_0-9a-z]*
+COMMENT="//"[^\n]*
+TYPE_IDENTIFIER=[A-Z][_0-9a-zA-Z]*
 
 %%
 <YYINITIAL> {
-  {WHITE_SPACE}      { return WHITE_SPACE; }
+  {WHITE_SPACE}          { return WHITE_SPACE; }
 
-  "{"                { return LBRACE; }
-  "}"                { return RBRACE; }
-  "["                { return LBRACK; }
-  "]"                { return RBRACK; }
-  "("                { return LPAREN; }
-  ")"                { return RPAREN; }
-  ":"                { return COLON; }
-  ";"                { return SEMICOLON; }
-  ","                { return COMMA; }
-  "="                { return EQ; }
-  "!="               { return BANGEQ; }
-  "=="               { return EQEQ; }
-  "!"                { return BANG; }
-  "+="               { return PLUSEQ; }
-  "+"                { return PLUS; }
-  "-="               { return MINUSEQ; }
-  "-"                { return MINUS; }
-  "||"               { return OR; }
-  "<"                { return LT; }
-  "*"                { return MUL; }
-  "/"                { return DIV; }
-  "//"               { return DIVDIV; }
-  ">"                { return GT; }
-  ".."               { return DOTDOT; }
-  "=>"               { return FAT_ARROW; }
-  "->"               { return ARROW; }
-  "?"                { return Q; }
-  "\""               { return QUOTE; }
-  "CR"               { return CR; }
-  "CRLF"             { return CRLF; }
+  "pub"                  { return PUB; }
+  "fn"                   { return FN; }
+  "fet"                  { return LET; }
+  "case"                 { return CASE; }
+  "import"               { return IMPORT; }
+  "type"                 { return TYPE; }
+  "assert"               { return ASSERT; }
+  "todo"                 { return TODO; }
+  "const"                { return CONST; }
+  "external"             { return EXTERNAL; }
+  "{"                    { return LBRACE; }
+  "}"                    { return RBRACE; }
+  "["                    { return LBRACK; }
+  "]"                    { return RBRACK; }
+  "("                    { return LPAREN; }
+  ")"                    { return RPAREN; }
+  ":"                    { return COLON; }
+  ","                    { return COMMA; }
+  "="                    { return EQ; }
+  "=="                   { return EQEQ; }
+  "!"                    { return BANG; }
+  "+"                    { return PLUS; }
+  "-"                    { return MINUS; }
+  "||"                   { return OR; }
+  "&&"                   { return AND; }
+  "<"                    { return LT; }
+  ">"                    { return GT; }
+  "*"                    { return MUL; }
+  "/"                    { return DIV; }
+  "//"                   { return DIVDIV; }
+  "."                    { return DOT; }
+  ".."                   { return DOTDOT; }
+  "=>"                   { return FAT_ARROW; }
+  "->"                   { return ARROW; }
+  "\""                   { return QUOTE; }
 
+  {IDENTIFIER}           { return IDENTIFIER; }
+  {COMMENT}              { return COMMENT; }
+  {TYPE_IDENTIFIER}      { return TYPE_IDENTIFIER; }
 
 }
 

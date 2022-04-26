@@ -16,6 +16,7 @@ class GleamHighlighter : SyntaxHighlighterBase() {
     companion object {
         fun map(tokenType: IElementType?): GleamColor? = when (tokenType) {
             COMMENT -> GleamColor.COMMENT
+            // TODO implement highlighting for different parts of code
             else -> null
         }
     }
