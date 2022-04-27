@@ -17,7 +17,7 @@
         // Keywords
         PUB = "pub"
         FN = "fn"
-        LET = "fet"
+        LET = "let"
         CASE = "case"
         IMPORT = "import"
         TYPE = "type"
@@ -28,8 +28,14 @@
 
         // Regexp
         IDENTIFIER = "regexp:[_a-z][_0-9a-z]*"
-        COMMENT = "regexp://[^\n]*"
-        TYPE_IDENTIFIER = "regexp:[A-Z][_0-9a-zA-Z]*"
+        UPPER_IDENTIFIER = "regexp:[A-Z][_0-9a-zA-Z]*"
+
+        COMMENT = "regexp://([^\n]*)?"
+        DOC_COMMENT = "regexp:///([^\n]*)?"
+        MODULE_COMMENT = "regexp:////([^\n]*)?"
+
+        NUMBER = "regexp:[0-9]*"
+        STRING_CONTENT = "regexp:\"([^\\\\\\\"]|\\\\[^efnrt\\\"\\\\])+\"" // TODO improve matching for string content
 
         // Chars
         LBRACE      =  '{'
@@ -68,6 +74,8 @@
         ARROW       =  '->'
 
         QUOTE       =  '"'
+
+        PIPE        =  '|>'
     ]
 }
 
@@ -77,20 +85,36 @@ private topLevelDefinition ::=
     | typeStatement
     | functionStatement
     | COMMENT
+    | ([PUB] constantStatement)
 
 private innerDefinition ::=
     COMMENT
+    | variableStatement
+    | constantStatement
+    | functionCall
 
-private constructorElement ::= constructorIdentifier TYPE_IDENTIFIER [COMMA]
+typeIdentifier ::= [IDENTIFIER DOT] UPPER_IDENTIFIER [LPAREN typeIdentifierInnerType [typeIdentifierInnerType*] RPAREN]
+typeIdentifierInnerType ::= typeIdentifier [COMMA]
+
+private constructorElement ::= constructorIdentifier typeIdentifier [COMMA]
 constructorIdentifier ::= IDENTIFIER COLON
 
 importStatement ::= IMPORT importStatementElement
 importStatementElement ::= IDENTIFIER ('/' IDENTIFIER [importStatementTypes])*
-importStatementTypes ::= DOT LBRACE ((TYPE_IDENTIFIER|IDENTIFIER) [COMMA])* RBRACE
+importStatementTypes ::= DOT LBRACE ((UPPER_IDENTIFIER|IDENTIFIER) [COMMA])* RBRACE
 
 // TODO improve type statement parsing
-typeStatement ::= [PUB] TYPE TYPE_IDENTIFIER LBRACE (typeStatementConstructor)* RBRACE
-typeStatementConstructor ::= TYPE_IDENTIFIER LPAREN (constructorElement)* RPAREN
+typeStatement ::= [PUB] TYPE UPPER_IDENTIFIER LBRACE (typeStatementConstructor)* RBRACE
+typeStatementConstructor ::= UPPER_IDENTIFIER LPAREN (constructorElement)* RPAREN
 
 functionStatement ::= [PUB] FN IDENTIFIER LPAREN [(constructorElement)*] RPAREN [functionStatementType] LBRACE [innerDefinition*] RBRACE
-functionStatementType ::= ARROW TYPE_IDENTIFIER
+functionStatementType ::= ARROW typeIdentifier
+
+variableStatement ::= LET IDENTIFIER EQ variableValue
+constantStatement ::= CONST IDENTIFIER EQ variableValue
+
+// TODO parse value inside string
+variableValue ::= functionCall | UPPER_IDENTIFIER | typeIdentifier | IDENTIFIER | NUMBER | STRING_CONTENT
+
+functionCall ::= [IDENTIFIER DOT] IDENTIFIER LPAREN [functionCallParam*] RPAREN [PIPE functionCall]
+functionCallParam ::= ((IDENTIFIER COLON variableValue) | variableValue)[COMMA]
