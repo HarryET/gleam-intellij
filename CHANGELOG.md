@@ -2,3 +2,5 @@
 # Gleam Language Changelog
 
 ## [Unreleased]
+- Initial Gleam Grammar (@HarryET)
+- Initial Gleam Highlighting (@HarryET)
