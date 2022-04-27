@@ -1,7 +1,7 @@
 package run.gleam.lang
 
 import com.intellij.openapi.fileTypes.LanguageFileType
-import run.gleam.icons.GleamIcons
+import run.gleam.ide.icons.GleamIcons
 import javax.swing.Icon
 
 object GleamFileType : LanguageFileType(GleamLanguage) {

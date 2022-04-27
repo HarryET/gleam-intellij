@@ -1,4 +1,4 @@
-package run.gleam.icons
+package run.gleam.ide.icons
 
 import com.intellij.openapi.util.IconLoader
 import javax.swing.Icon
