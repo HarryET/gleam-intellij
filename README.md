@@ -6,6 +6,12 @@
 
 <!-- Plugin description -->
 [Gleam](https://gleam.run) language support
+
+This plugin will use the Gleam LSP too power features such as:
+- [ ] Hover Information
+- [ ] Definition Information
+- [ ] Document Formatting
+</br>And more to come ...
 <!-- Plugin description end -->
 
 ## Installation
