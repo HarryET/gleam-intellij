@@ -10,6 +10,11 @@
 
     <depends>com.intellij.modules.platform</depends>
 
+    <applicationListeners>
+        <listener class="run.gleam.lsp.listeners.ProjectManagerListener"
+                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
+    </applicationListeners>
+
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="Gleam"
                   language="Gleam"
@@ -23,5 +28,9 @@
                                 implementationClass="run.gleam.ide.highlight.GleamHighlighter"/>
 
         <colorSettingsPage implementation="run.gleam.ide.colors.GleamColorSettingsPage"/>
+
+        <projectService serviceImplementation="run.gleam.lsp.services.LspService" />
+
+        <notificationGroup id="gleam.lsp" displayType="STICKY_BALLOON"/>
     </extensions>
 </idea-plugin>

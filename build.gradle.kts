@@ -28,6 +28,10 @@ repositories {
     mavenCentral()
 }
 
+dependencies  {
+    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j:0.12.0")
+}
+
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
 intellij {
     pluginName.set(properties("pluginName"))
