@@ -1,7 +1,5 @@
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.jetbrains.grammarkit.tasks.GenerateLexerTask
-import org.jetbrains.grammarkit.tasks.GenerateParserTask
 
 fun properties(key: String) = project.findProperty(key).toString()
 
@@ -16,8 +14,10 @@ plugins {
     id("org.jetbrains.changelog") version "1.3.1"
     // Gradle Qodana Plugin
     id("org.jetbrains.qodana") version "0.1.13"
-    // Gradle Grammar Kit Plugin
-    id("org.jetbrains.grammarkit") version "2021.2.2"
+//    // Gradle Grammar Kit Plugin
+//    id("org.jetbrains.grammarkit") version "2021.2.2"
+    // ANTLRv4 Grammar Plugin
+    id("antlr")
 }
 
 group = properties("pluginGroup")
@@ -26,6 +26,13 @@ version = properties("pluginVersion")
 // Configure project's dependencies
 repositories {
     mavenCentral()
+}
+
+dependencies {
+    implementation("org.antlr:antlr4-intellij-adaptor:0.1")
+    antlr("org.antlr:antlr4:4.11.1") { // use ANTLR version 4
+        exclude("group:'com.ibm.icu', module:'icu4j'")
+    }
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
@@ -52,21 +59,6 @@ qodana {
     showReport.set(System.getenv("QODANA_SHOW_REPORT")?.toBoolean() ?: false)
 }
 
-val generateGleamLexer = task<GenerateLexerTask>("generateGleamLexer") {
-    source.set("src/main/grammars/GleamLexer.flex")
-    targetDir.set("src/gen/run/gleam/lang/core/lexer")
-    targetClass.set("_GleamLexer")
-    purgeOldFiles.set(true)
-}
-
-val generateGleamParser = task<GenerateParserTask>("generateGleamParser") {
-    source.set("src/main/grammars/GleamParser.bnf")
-    targetRoot.set("src/gen")
-    pathToParser.set("/run/gleam/lang/core/parser/GleamParser.java")
-    pathToPsiRoot.set("/run/gleam/lang/core/psi")
-    purgeOldFiles.set(true)
-}
-
 tasks {
     // Set the JVM compatibility versions
     properties("javaVersion").let {
@@ -77,16 +69,6 @@ tasks {
         withType<KotlinCompile> {
             kotlinOptions.jvmTarget = it
         }
-    }
-
-    withType<KotlinCompile> {
-        // Add generated code to the source
-        sourceSets["main"].java.srcDirs("src/gen")
-
-        dependsOn(
-            generateGleamLexer,
-            generateGleamParser
-        )
     }
 
     wrapper {

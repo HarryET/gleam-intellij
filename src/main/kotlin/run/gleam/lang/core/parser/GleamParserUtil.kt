@@ -3,7 +3,6 @@ package run.gleam.lang.core.parser
 import com.intellij.lang.parser.GeneratedParserUtilBase
 import com.intellij.lang.*
 import com.intellij.psi.tree.*
-import run.gleam.lang.core.psi.GleamTypes.*
 
 object GleamParserUtil : GeneratedParserUtilBase() {
     private fun parseLineTokens(builder: PsiBuilder, tokens: Set<IElementType>): Boolean {
