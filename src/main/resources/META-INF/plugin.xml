@@ -25,6 +25,9 @@
         <lang.foldingBuilder language="Gleam"
                              implementationClass="run.gleam.ide.GleamFoldingBuilder" />
 
+        <lang.commenter language="Gleam"
+                        implementationClass="run.gleam.ide.commenter.GleamCommenter"/>
+
         <externalAnnotator language="Gleam"
                    implementationClass="run.gleam.ide.highlight.GleamAnnotator" />
 
