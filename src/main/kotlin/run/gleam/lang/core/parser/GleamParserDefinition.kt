@@ -18,7 +18,7 @@ import run.gleam.lang.core.psi.GleamTypes
 
 class GleamParserDefinition : ParserDefinition {
     private val whiteSpace = TokenSet.create(TokenType.WHITE_SPACE)
-    private val comments = TokenSet.create(GleamTypes.COMMENT)
+    private val comments = TokenSet.create(GleamTypes.COMMENT_DOC, GleamTypes.COMMENT_MODULE, GleamTypes.COMMENT_NORMAL)
     private val file = IFileElementType(GleamLanguage)
 
     override fun createLexer(project: Project?): Lexer = GleamLexer()

@@ -16,12 +16,12 @@ class GleamHighlighter : SyntaxHighlighterBase() {
 
     companion object {
         fun map(tokenType: IElementType?): GleamColor? = when (tokenType) {
-            COMMENT -> GleamColor.COMMENT
-            DOC_COMMENT -> GleamColor.DOC_COMMENT
-            MODULE_COMMENT -> GleamColor.MODULE_COMMENT
+            COMMENT_NORMAL -> GleamColor.COMMENT
+            COMMENT_DOC -> GleamColor.DOC_COMMENT
+            COMMENT_MODULE -> GleamColor.MODULE_COMMENT
             PUB, FN, LET, CASE, IMPORT, TYPE, ASSERT, TODO, CONST, EXTERNAL -> GleamColor.KEYWORD
-            STRING_CONTENT -> GleamColor.STRING
-            UPPER_IDENTIFIER, TYPE_IDENTIFIER -> GleamColor.TYPE_IDENTIFIER
+            STRING -> GleamColor.STRING
+            UP_NAME, TYPE_IDENTIFIER -> GleamColor.TYPE_IDENTIFIER
             // TODO implement highlighting for different parts of code
             else -> null
         }

@@ -1,4 +1,4 @@
-package run.gleam.lang.core.lexer;
+package run.gleam.lang.core.parser;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
@@ -22,65 +22,103 @@ import static run.gleam.lang.core.psi.GleamTypes.*;
 %type IElementType
 %unicode
 
-EOL=\R
-WHITE_SPACE=\s+
+EOL_WS           = \n | \r | \r\n
+LINE_WS          = [\ \t]
+WHITE_SPACE_CHAR = {EOL_WS} | {LINE_WS}
+WHITE_SPACE      = {WHITE_SPACE_CHAR}+
 
-IDENTIFIER=[_a-z][_0-9a-z]*
-UPPER_IDENTIFIER=[A-Z][_0-9a-zA-Z]*
-COMMENT="//"([^\n]*)?
-DOC_COMMENT="///"([^\n]*)?
-MODULE_COMMENT="////"([^\n]*)?
-NUMBER=[0-9]*
-STRING_CONTENT=\"([^\\\\\\\"]|\\\\[^efnrt\\\"\\\\])+\"
+NAME=[a-z_][_0-9a-z]*
+UP_NAME=[A-Z][0-9a-zA-Z]*
+DISCARD_NAME=_[_0-9a-z]*
+IDENTIFIER= {NAME} | {UP_NAME} | {DISCARD_NAME}
+
+INTEGER = {DECIMAL} | {HEX} | {OCTAL} | {BINARY}
+DECIMAL=[0-9][0-9_]*
+HEX=0x[a-fA-F0-9_]*
+OCTAL=0o[0-7_]*
+BINARY=0b[01_]*
+
+ESC= '\\' [\"\bfnrt]
+STRING= '\"' ({ESC} | ~[\"\\])* '\"'
+EXPONENT      = [eE] [-+]? [0-9_]+
+FLOAT=  '-'? {DECIMAL} '.' [0-9_]+ {DECIMAL}?   // 1.35, 1.35E-9, 0.3, -4.5
+    |   '-'? {DECIMAL} '.'
+    |   '-'? {DECIMAL} {EXPONENT}               // 1e10 -3e4
+
 
 %%
 <YYINITIAL> {
-  {WHITE_SPACE}           { return WHITE_SPACE; }
 
-  "pub"                   { return PUB; }
-  "fn"                    { return FN; }
-  "let"                   { return LET; }
-  "case"                  { return CASE; }
-  "import"                { return IMPORT; }
-  "type"                  { return TYPE; }
-  "assert"                { return ASSERT; }
-  "todo"                  { return TODO; }
-  "const"                 { return CONST; }
-  "external"              { return EXTERNAL; }
-  "{"                     { return LBRACE; }
-  "}"                     { return RBRACE; }
-  "["                     { return LBRACK; }
-  "]"                     { return RBRACK; }
-  "("                     { return LPAREN; }
-  ")"                     { return RPAREN; }
-  ":"                     { return COLON; }
-  ","                     { return COMMA; }
-  "="                     { return EQ; }
-  "=="                    { return EQEQ; }
-  "!"                     { return BANG; }
-  "+"                     { return PLUS; }
-  "-"                     { return MINUS; }
-  "||"                    { return OR; }
-  "&&"                    { return AND; }
-  "<"                     { return LT; }
-  ">"                     { return GT; }
-  "*"                     { return MUL; }
-  "/"                     { return DIV; }
-  "//"                    { return DIVDIV; }
-  "."                     { return DOT; }
-  ".."                    { return DOTDOT; }
-  "=>"                    { return FAT_ARROW; }
-  "->"                    { return ARROW; }
-  "\""                    { return QUOTE; }
-  "|>"                    { return PIPE; }
+  "as"                  { return AS; }
+  "assert"              { return ASSERT; }
+  "case"                { return CASE; }
+  "const"               { return CONST; }
+  "external"            { return EXTERNAL; }
+  "fn"                  { return FN; }
+  "if"                  { return IF; }
+  "import"              { return IMPORT; }
+  "let"                 { return LET; }
+  "opaque"              { return OPAQUE; }
+  "pub"                 { return PUB; }
+  "todo"                { return TODO; }
+  "try"                 { return TRY; }
+  "type"                { return TYPE; }
+  "use"                 { return USE; }
+  "True"                { return TRUE; }
+  "False"               { return FALSE; }
+  "("                   { return LEFT_PAREN; }
+  ")"                   { return RIGHT_PAREN; }
+  "["                   { return LEFT_SQUARE; }
+  "]"                   { return RIGHT_SQUARE; }
+  "{"                   { return LEFT_BRACE; }
+  "}"                   { return RIGHT_BRACE; }
+  "+"                   { return PLUS; }
+  "-"                   { return MINUS; }
+  "*"                   { return STAR; }
+  "/"                   { return SLASH; }
+  "<"                   { return LESS; }
+  ">"                   { return GREATER; }
+  "<="                  { return LESS_EQUAL; }
+  ">="                  { return GREATER_EQUAL; }
+  "%"                   { return PERCENT; }
+  "+."                  { return PLUS_DOT; }
+  "-."                  { return MINUS_DOT; }
+  "*."                  { return STAR_DOT; }
+  "/."                  { return SLASH_DOT; }
+  "<."                  { return LESS_DOT; }
+  ">."                  { return GREATER_DOT; }
+  "<=."                 { return LESS_EQUAL_DOT; }
+  ">=."                 { return GREATER_EQUAL_DOT; }
+  "<>"                  { return LT_GT; }
+  ":"                   { return COLON; }
+  ","                   { return COMMA; }
+  "#"                   { return HASH; }
+  "!"                   { return BANG; }
+  "="                   { return EQUAL; }
+  "=="                  { return EQUAL_EQUAL; }
+  "!="                  { return NOT_EQUAL; }
+  "|"                   { return VBAR; }
+  "||"                  { return VBAR_VBAR; }
+  "&&"                  { return AMPER_AMPER; }
+  "<<"                  { return LT_LT; }
+  ">>"                  { return GT_GT; }
+  "|>"                  { return PIPE; }
+  "."                   { return DOT; }
+  "->"                  { return R_ARROW; }
+  "<-"                  { return L_ARROW; }
+  ".."                  { return DOT_DOT; }
+  "<ID>"                { return ID; }
 
-  {IDENTIFIER}            { return IDENTIFIER; }
-  {UPPER_IDENTIFIER}      { return UPPER_IDENTIFIER; }
-  {COMMENT}               { return COMMENT; }
-  {DOC_COMMENT}           { return DOC_COMMENT; }
-  {MODULE_COMMENT}        { return MODULE_COMMENT; }
-  {NUMBER}                { return NUMBER; }
-  {STRING_CONTENT}        { return STRING_CONTENT; }
+  "////" .*             { return COMMENT_MODULE; }
+  "///" .*              { return COMMENT_DOC; }
+  "//" .*               { return COMMENT_NORMAL; }
+  {DISCARD_NAME}        { return DISCARD_NAME; }
+  {NAME}                { return NAME; }
+  {UP_NAME}             { return UP_NAME; }
+  {INTEGER}             { return INTEGER; }
+  {STRING}              { return STRING; }
+  {FLOAT}               { return FLOAT; }
+  {WHITE_SPACE}         { return WHITE_SPACE; }
 
 }
 
