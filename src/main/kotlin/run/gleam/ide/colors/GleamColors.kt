@@ -17,8 +17,13 @@ enum class GleamColor(humanName: Supplier<@AttributeDescriptor String>, default:
     KEYWORD(GleamBundle.messagePointer("settings.gleam.color.keyword"), Default.KEYWORD),
 
     STRING(GleamBundle.messagePointer("settings.gleam.color.string"), Default.STRING),
+    NUMBER(GleamBundle.messagePointer("settings.gleam.color.number"), Default.NUMBER),
+    BOOLEAN(GleamBundle.messagePointer("settings.gleam.color.boolean"), Default.KEYWORD),
 
-    TYPE_IDENTIFIER(GleamBundle.messagePointer("settings.gleam.color.identifier.type"), Default.CLASS_NAME),
+    BRACES(GleamBundle.messagePointer("settings.gleam.color.brace"), Default.BRACES),
+    PARENTHESES(GleamBundle.messagePointer("settings.gleam.color.paren"), Default.PARENTHESES),
+
+    OPERATION_SIGN(GleamBundle.messagePointer("settings.gleam.color.operation_sign"), Default.OPERATION_SIGN)
     ;
 
     val textAttributesKey = TextAttributesKey.createTextAttributesKey("run.gleam.$name", default)
