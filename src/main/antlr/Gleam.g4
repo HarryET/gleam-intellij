@@ -81,7 +81,8 @@ external_function: (visibility_modifier)? EXTERNAL FN identifier external_functi
 function_parameter_args: labeled_discard_param | discard_param | labeled_name_param | name_param;
 function_parameter: function_parameter_args (type_annotation)?;
 function_parameters: LEFT_PAREN (function_parameter (COMMA function_parameter)* (COMMA)?)? RIGHT_PAREN;
-function: (visibility_modifier)? FN identifier function_parameters (R_ARROW type_base)? LEFT_BRACE (expression_seq)? RIGHT_BRACE;
+function_body: LEFT_BRACE (expression_seq)? RIGHT_BRACE;
+function: (visibility_modifier)? FN identifier function_parameters (R_ARROW type_base)? function_body;
 
 list_pattern_tail: DOT_DOT (identifier | discard)?;
 list_pattern: LEFT_SQUARE (pattern (COMMA pattern)* (COMMA)?)? (list_pattern_tail)? RIGHT_SQUARE;
@@ -113,7 +114,7 @@ list: LEFT_SQUARE (expression ((COMMA expression)*)? (COMMA)? ('..' expression)?
 anonymous_function_parameter_args: discard_param | name_param;
 anonymous_function_parameter: anonymous_function_parameter_args (type_annotation)?;
 anonymous_function_parameters: LEFT_PAREN (anonymous_function_parameter (COMMA anonymous_function_parameter)* (COMMA)?)? RIGHT_PAREN;
-anonymous_function: FN anonymous_function_parameters (R_ARROW type)? LEFT_BRACE expression_seq RIGHT_BRACE;
+anonymous_function: FN anonymous_function_parameters (R_ARROW type)? function_body;
 
 expression_group: LEFT_BRACE expression_seq RIGHT_BRACE;
 

@@ -22,6 +22,9 @@
         <lang.syntaxHighlighter language="Gleam"
                                 implementationClass="run.gleam.ide.highlight.GleamHighlighter"/>
 
+        <lang.foldingBuilder language="Gleam"
+                             implementationClass="run.gleam.ide.GleamFoldingBuilder" />
+
         <externalAnnotator language="Gleam"
                    implementationClass="run.gleam.ide.highlight.GleamAnnotator" />
 
