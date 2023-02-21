@@ -2,8 +2,8 @@ grammar Gleam;
 
 source_file: (statement | expression_seq | target_group)* EOF;
 
-// How to enforce javascript | erlang here? If we try to, ANTLR will consider all further uses of them as a token
-target_group: IF (RUNTIME) LEFT_BRACE (statement)* RIGHT_BRACE;
+// Enforce javascript | erlang with an intellij annotator
+target_group: IF (identifier) LEFT_BRACE (statement)* RIGHT_BRACE;
 
 module : NAME (SLASH NAME)*;
 unqualified_import
@@ -36,16 +36,14 @@ constant_record_argument: (label COLON)? constant_value;
 constant_record_arguments: LEFT_PAREN (constant_record_argument (COMMA (constant_record_argument)* (COMMA)?))? RIGHT_PAREN;
 constant_record : (constructor_name | remote_constructor_name) (constant_record_arguments)?;
 
-//fragment SIZE: 'size';
-constant_bit_string_segment_option_size : SIZE LEFT_PAREN INTEGER RIGHT_PAREN;
-fragment BIT_STRING_SEGMENT_OPTION : 'binary' | 'bytes' | 'int' | 'float' | 'bit_string' | 'bits' | 'utf8' | 'utf16' | 'utf32' | 'utf8_codepoint'
-    | 'utf16_codepoint' | 'utf32_codepoint' | 'signed' | 'unsigned' | 'big' | 'little' | 'native' | 'unit' '(' INTEGER ')';
-constant_bit_string_named_segment_option: BIT_STRING_SEGMENT_OPTION | constant_bit_string_segment_option_size;
-constant_bit_string_segment_option: constant_bit_string_named_segment_option | INTEGER;
-constant_bit_string_segment_options: constant_bit_string_segment_option (MINUS constant_bit_string_segment_option)*  (MINUS)?;
-constant_bit_string_segment: constant_value (COLON constant_bit_string_segment_options)?;
-constant_bit_string:
-    LT_LT  (constant_bit_string_segment (COMMA constant_bit_string_segment)* (COMMA)?)? GT_GT;
+bit_string_segment_option_size : identifier LEFT_PAREN INTEGER RIGHT_PAREN;
+// 'binary' | 'bytes' | 'int' | 'float' | 'bit_string' | 'bits' | 'utf8' | 'utf16' | 'utf32' | 'utf8_codepoint' | 'utf16_codepoint' | 'utf32_codepoint' | 'signed' | 'unsigned' | 'big' | 'little' | 'native' | 'unit' '(' INTEGER ')';
+// enforce value for identifier for these surrounding 2 rules with an intelliJ annotator
+bit_string_named_segment_option: identifier | bit_string_segment_option_size;
+bit_string_segment_option: bit_string_named_segment_option | INTEGER;
+bit_string_segment_options: bit_string_segment_option (MINUS bit_string_segment_option)*  (MINUS)?;
+constant_bit_string_segment: constant_value (COLON bit_string_segment_options)?;
+constant_bit_string: LT_LT  (constant_bit_string_segment (COMMA constant_bit_string_segment)* (COMMA)?)? GT_GT;
 
 constant_type: (type_identifier | remote_type_identifier) (constant_type_arguements)?;
 constant_type_special
@@ -87,12 +85,7 @@ function: (visibility_modifier)? FN identifier function_parameters (R_ARROW type
 list_pattern_tail: DOT_DOT (identifier | discard)?;
 list_pattern: LEFT_SQUARE (pattern (COMMA pattern)* (COMMA)?)? (list_pattern_tail)? RIGHT_SQUARE;
 
-pattern_bit_string_segment_argument: identifier | INTEGER;
-pattern_bit_string_segment_option_size: SIZE LEFT_PAREN pattern_bit_string_segment_argument RIGHT_PAREN;
-pattern_bit_string_named_segment_option: BIT_STRING_SEGMENT_OPTION | pattern_bit_string_segment_option_size;
-pattern_bit_string_segment_option: pattern_bit_string_named_segment_option | INTEGER;
-pattern_bit_string_segment_options: pattern_bit_string_segment_option (MINUS pattern_bit_string_segment_option)* (MINUS)?;
-pattern_bit_string_segment: pattern (COLON pattern_bit_string_segment_options)?;
+pattern_bit_string_segment: pattern (COLON bit_string_segment_options)?;
 pattern_bit_string: LT_LT (pattern_bit_string_segment (COMMA pattern_bit_string_segment)* (COMMA)?)? GT_GT;
 
 tuple_pattern: HASH LEFT_PAREN (pattern (COMMA pattern)* (COMMA)?)? RIGHT_PAREN;
@@ -109,11 +102,7 @@ argument: (label ':')? (hole | expression);
 arguments: LEFT_PAREN (argument (COMMA argument)* (COMMA)?)? RIGHT_PAREN;
 record: (constructor_name | remote_constructor_name) (arguments)?;
 
-expression_bit_string_segment_option_size: SIZE LEFT_PAREN expression RIGHT_PAREN;
-expression_bit_string_named_segment_option: BIT_STRING_SEGMENT_OPTION | expression_bit_string_segment_option_size;
-expression_bit_string_segment_option: expression_bit_string_named_segment_option | INTEGER;
-expression_bit_string_segment_options: expression_bit_string_segment_option (MINUS expression_bit_string_segment_option)* (MINUS)?;
-expression_bit_string_segment: expression_unit (COLON expression_bit_string_segment_options)?;
+expression_bit_string_segment: expression_unit (COLON bit_string_segment_options)?;
 expression_bit_string: LT_LT (expression_bit_string_segment (COMMA expression_bit_string_segment)* (COMMA)?)? GT_GT;
 
 todo: TODO (LEFT_PAREN STRING RIGHT_PAREN)?;
@@ -141,14 +130,13 @@ case_clauses: (case_clause)+;
 case_subjects: expression_seq;
 case: CASE case_subjects LEFT_BRACE case_clauses RIGHT_BRACE;
 
-//use_args: identifier | identifier COMMA use_args;
-//use: USE (use_args)? L_ARROW expression;
+use_args: identifier | identifier COMMA use_args;
+use: USE (use_args)? L_ARROW expression;
 
 assignment: pattern (type_annotation)? EQUAL expression;
 let: LET assignment;
 assert: ASSERT assignment;
 negation: BANG expression_unit;
-
 
 record_update_argument: label COLON expression;
 record_update_arguments: record_update_argument (COMMA record_update_argument)* (COMMA)?;
@@ -166,9 +154,6 @@ call_or_access
      | tuple DOT INTEGER
      | anonymous_function arguments
      ;
-
-use_args: identifier | identifier COMMA use_args;
-use: USE (use_args)? L_ARROW expression;
 
 expression_literal: STRING | INTEGER | FLOAT | TRUE | FALSE;
 expression_unit
@@ -202,6 +187,7 @@ expression
     | left=expression GREATER_EQUAL right=expression #gte
     | left=expression GREATER_DOT right=expression #gtf
     | left=expression GREATER_EQUAL_DOT right=expression #gtef
+    | left=expression LT_GT right=expression #ltgt
     | left=expression PIPE right=expression #pipe
     | left=expression PLUS right=expression #plus
     | left=expression PLUS_DOT right=expression #plusf
@@ -273,8 +259,6 @@ USE: 'use';
 // Unofficial Tokens
 TRUE: 'True';
 FALSE: 'False';
-SIZE: 'size';
-RUNTIME: 'javascript' | 'erlang';
 
 // Groupings
 LEFT_PAREN: '(';
