@@ -22,6 +22,9 @@
         <lang.syntaxHighlighter language="Gleam"
                                 implementationClass="run.gleam.ide.highlight.GleamHighlighter"/>
 
+        <annotator language="Gleam"
+                   implementationClass="run.gleam.ide.highlight.GleamAnnotator" />
+
         <colorSettingsPage implementation="run.gleam.ide.colors.GleamColorSettingsPage"/>
     </extensions>
 </idea-plugin>
