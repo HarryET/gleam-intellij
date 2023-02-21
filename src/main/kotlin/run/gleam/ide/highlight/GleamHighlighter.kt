@@ -19,8 +19,7 @@ class GleamHighlighter : SyntaxHighlighterBase() {
     companion object {
         fun map(tokenType: IElementType?): GleamColor? {
             if (tokenType !is TokenIElementType) return null;
-            val ttype = tokenType.antlrTokenType;
-            return when (ttype) {
+            return when (tokenType.antlrTokenType) {
                 GleamLexer.COMMENT_NORMAL -> GleamColor.COMMENT
                 GleamLexer.COMMENT_DOC -> GleamColor.DOC_COMMENT
                 GleamLexer.COMMENT_MODULE -> GleamColor.MODULE_COMMENT
@@ -40,7 +39,10 @@ class GleamHighlighter : SyntaxHighlighterBase() {
                 GleamLexer.EQUAL, GleamLexer.EQUAL_EQUAL, GleamLexer.NOT_EQUAL,
                 GleamLexer.GREATER, GleamLexer.GREATER_EQUAL, GleamLexer.GREATER_EQUAL_DOT,
                 GleamLexer.GREATER_DOT, GleamLexer.LESS, GleamLexer.LESS_EQUAL,
-                GleamLexer.LESS_EQUAL_DOT, GleamLexer.LESS_DOT -> GleamColor.OPERATION_SIGN
+                GleamLexer.LESS_EQUAL_DOT, GleamLexer.LESS_DOT,
+                GleamLexer.L_ARROW, GleamLexer.R_ARROW -> GleamColor.OPERATION_SIGN
+
+                GleamLexer.DISCARD_NAME -> GleamColor.DISCARDED_VARIABLE
 
                 else -> null
             }

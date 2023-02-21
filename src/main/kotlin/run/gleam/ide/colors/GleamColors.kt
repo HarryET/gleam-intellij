@@ -23,6 +23,14 @@ enum class GleamColor(humanName: Supplier<@AttributeDescriptor String>, default:
     BRACES(GleamBundle.messagePointer("settings.gleam.color.brace"), Default.BRACES),
     PARENTHESES(GleamBundle.messagePointer("settings.gleam.color.paren"), Default.PARENTHESES),
 
+    LOCAL_VARIABLE(GleamBundle.messagePointer("settings.gleam.color.variable.local"), Default.LOCAL_VARIABLE),
+    DISCARDED_VARIABLE(GleamBundle.messagePointer("settings.gleam.color.variable.discard"), Default.LINE_COMMENT),
+
+    FUNCTION_DECLARATION(GleamBundle.messagePointer("settings.gleam.color.function"), Default.FUNCTION_DECLARATION),
+    FUNCTION_PARAM(GleamBundle.messagePointer("settings.gleam.color.function.param"), Default.PARAMETER),
+
+    TYPE_IDENTIFIER(GleamBundle.messagePointer("settings.gleam.color.type_identifier"), Default.CLASS_REFERENCE),
+
     OPERATION_SIGN(GleamBundle.messagePointer("settings.gleam.color.operation_sign"), Default.OPERATION_SIGN)
     ;
 
