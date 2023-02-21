@@ -172,11 +172,11 @@ function_parameter_types ::= LEFT_PAREN (type_base (COMMA type_base)* (COMMA)?)?
 tuple_type::= HASH LEFT_PAREN (type_base (COMMA type_base)* (COMMA)?)? RIGHT_PAREN;
 function_type::= FN (function_parameter_types)? R_ARROW type_base;
 
-type_base::= type_hole | tuple_type | function_type | type | type_var;
+type_base::= type_hole | tuple_type | function_type | type_rule | type_var;
 type_annotation::= COLON type_base;
 type_argument::= type_base;
 type_arguments::= LEFT_PAREN (type_argument (COMMA type_argument)* (COMMA)?)? RIGHT_PAREN;
-type::= (type_identifier | remote_type_identifier) (type_arguments)?;
+type_rule::= (type_identifier | remote_type_identifier) (type_arguments)?;
 
 external_function_body::= STRING STRING;
 external_function_parameter::= (identifier COLON)? type_base;
@@ -202,8 +202,8 @@ record_pattern_arguments::= LEFT_PAREN (record_pattern_argument (COMMA record_pa
 record_pattern::= (constructor_name | remote_constructor_name) (record_pattern_arguments)?;
 pattern::= (identifier | discard | record_pattern | expression_literal | tuple_pattern | pattern_bit_string | list_pattern) (AS identifier)?;
 
-try::= TRY pattern (type_annotation)? EQUAL expression;
-expression_seq::= (expression | try)+;
+try_rule::= TRY pattern (type_annotation)? EQUAL expression;
+expression_seq::= (expression | try_rule)+;
 
 argument::= (label ':')? (hole | expression);
 arguments::= LEFT_PAREN (argument (COMMA argument)* (COMMA)?)? RIGHT_PAREN;
@@ -212,14 +212,14 @@ record::= (constructor_name | remote_constructor_name) (arguments)?;
 expression_bit_string_segment::= expression_unit (COLON bit_string_segment_options)?;
 expression_bit_string::= LT_LT (expression_bit_string_segment (COMMA expression_bit_string_segment)* (COMMA)?)? GT_GT;
 
-todo::= TODO (LEFT_PAREN STRING RIGHT_PAREN)?;
+todo_rule::= TODO (LEFT_PAREN STRING RIGHT_PAREN)?;
 tuple::= HASH LEFT_PAREN (expression (COMMA expression)* (COMMA)?)? RIGHT_PAREN;
 list::= LEFT_SQUARE (expression ((COMMA expression)*)? (COMMA)? ('..' expression)?)? RIGHT_SQUARE;
 
 anonymous_function_parameter_args::= discard_param | name_param;
 anonymous_function_parameter::= anonymous_function_parameter_args (type_annotation)?;
 anonymous_function_parameters::= LEFT_PAREN (anonymous_function_parameter (COMMA anonymous_function_parameter)* (COMMA)?)? RIGHT_PAREN;
-anonymous_function::= FN anonymous_function_parameters (R_ARROW type)? function_body;
+anonymous_function::= FN anonymous_function_parameters (R_ARROW type_rule)? function_body;
 
 expression_group::= LEFT_BRACE expression_seq RIGHT_BRACE;
 
@@ -237,14 +237,14 @@ case_clause_patterns::= case_clause_pattern (VBAR case_clause_pattern)* (VBAR)?;
 case_clause::= case_clause_patterns (case_clause_guard)? R_ARROW expression;
 case_clauses::= (case_clause)+;
 case_subjects::= expression_seq;
-case::= CASE case_subjects LEFT_BRACE case_clauses RIGHT_BRACE;
+case_rule::= CASE case_subjects LEFT_BRACE case_clauses RIGHT_BRACE;
 
 use_args::= identifier | identifier COMMA use_args;
-use::= USE (use_args)? L_ARROW expression;
+use_rule::= USE (use_args)? L_ARROW expression;
 
 assignment::= pattern (type_annotation)? EQUAL expression;
-let::= LET assignment;
-assert::= ASSERT assignment;
+let_rule::= LET assignment;
+assert_rule::= ASSERT assignment;
 negation::= BANG expression_unit;
 
 record_update_argument::= label COLON expression;
@@ -252,7 +252,7 @@ record_update_arguments::= record_update_argument (COMMA record_update_argument)
 record_update::= (constructor_name | remote_constructor_name) LEFT_PAREN DOT_DOT expression COMMA record_update_arguments RIGHT_PAREN;
 
 self_call_or_access ::= call_or_access call_or_access_options {extends=call_or_access}
-case_call_or_access ::= case call_or_access_options {extends=call_or_access}
+case_call_or_access ::= case_rule call_or_access_options {extends=call_or_access}
 identifier_call_or_access ::= identifier call_or_access_options {extends=call_or_access}
 expression_group_call_or_access ::= identifier call_or_access_options {extends=call_or_access}
 record_call_or_access ::= record DOT label {extends=call_or_access}
@@ -277,15 +277,15 @@ expression_literal::= STRING | INTEGER | FLOAT | TRUE | FALSE;
 record_expression ::= record {extends=expression}
 anonymous_function_expression ::= anonymous_function {extends=expression}
 identifier_expression ::= identifier {extends=expression}
-todo_expression ::= todo {extends=expression}
+todo_expression ::= todo_rule {extends=expression}
 tuple_expression ::= tuple {extends=expression}
 list_expression ::= list {extends=expression}
 expression_bit_string_expression ::= expression_bit_string {extends=expression}
 expression_group_expression ::= expression_group {extends=expression}
-case_expression ::= case {extends=expression}
-let_expression ::= let {extends=expression}
-use_expression ::= use {extends=expression}
-assert_expression ::= assert {extends=expression}
+case_expression ::= case_rule {extends=expression}
+let_expression ::= let_rule {extends=expression}
+use_expression ::= use_rule {extends=expression}
+assert_expression ::= assert_rule {extends=expression}
 negation_expression ::= negation {extends=expression}
 record_update_expression ::= record_update {extends=expression}
 call_or_access_expression ::= call_or_access {extends=expression}
@@ -366,7 +366,7 @@ data_constructor::= constructor_name (data_constructor_arguments)?;
 data_constructors::= (data_constructor)+;
 
 type_definition::= (visibility_modifier)? (opacity_modifier)? TYPE type_name LEFT_BRACE data_constructors RIGHT_BRACE;
-type_alias::= (visibility_modifier)? (opacity_modifier)? TYPE type_name EQUAL type;
+type_alias::= (visibility_modifier)? (opacity_modifier)? TYPE type_name EQUAL type_rule;
 
 statement
     ::= imports
