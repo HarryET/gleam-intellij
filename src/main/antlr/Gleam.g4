@@ -78,7 +78,8 @@ external_function_parameter: (identifier COLON)? type_base;
 external_function_parameters: LEFT_PAREN (external_function_parameter (COMMA external_function_parameter)* (COMMA)?)? RIGHT_PAREN;
 external_function: (visibility_modifier)? EXTERNAL FN identifier external_function_parameters R_ARROW type_base EQUAL external_function_body;
 
-function_parameter: (labeled_discard_param | discard_param | labeled_name_param | name_param) (type_annotation)?;
+function_parameter_args: labeled_discard_param | discard_param | labeled_name_param | name_param;
+function_parameter: function_parameter_args (type_annotation)?;
 function_parameters: LEFT_PAREN (function_parameter (COMMA function_parameter)* (COMMA)?)? RIGHT_PAREN;
 function: (visibility_modifier)? FN identifier function_parameters (R_ARROW type_base)? LEFT_BRACE (expression_seq)? RIGHT_BRACE;
 
@@ -109,7 +110,8 @@ todo: TODO (LEFT_PAREN STRING RIGHT_PAREN)?;
 tuple: HASH LEFT_PAREN (expression (COMMA expression)* (COMMA)?)? RIGHT_PAREN;
 list: LEFT_SQUARE (expression ((COMMA expression)*)? (COMMA)? ('..' expression)?)? RIGHT_SQUARE;
 
-anonymous_function_parameter: (discard_param | name_param) (type_annotation)?;
+anonymous_function_parameter_args: discard_param | name_param;
+anonymous_function_parameter: anonymous_function_parameter_args (type_annotation)?;
 anonymous_function_parameters: LEFT_PAREN (anonymous_function_parameter (COMMA anonymous_function_parameter)* (COMMA)?)? RIGHT_PAREN;
 anonymous_function: FN anonymous_function_parameters (R_ARROW type)? LEFT_BRACE expression_seq RIGHT_BRACE;
 
