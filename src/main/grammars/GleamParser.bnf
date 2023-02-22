@@ -187,7 +187,8 @@ function_parameter_args::= labeled_discard_param | discard_param | labeled_name_
 function_parameter::= function_parameter_args (type_annotation)?;
 function_parameters::= LEFT_PAREN (function_parameter (COMMA function_parameter)* (COMMA)?)? RIGHT_PAREN;
 function_body::= LEFT_BRACE (expression_seq)? RIGHT_BRACE;
-function::= (visibility_modifier)? FN identifier function_parameters (R_ARROW type_base)? function_body {pin=2};
+function::= (visibility_modifier)? FN identifier function_parameters (R_ARROW type_base)? function_body {pin=2 recoverWhile=function_recover};
+private function_recover::= !(LEFT_BRACE)
 
 list_pattern_tail::= DOT_DOT (identifier | discard)?;
 list_pattern::= LEFT_SQUARE (pattern (COMMA pattern)* (COMMA)?)? (list_pattern_tail)? RIGHT_SQUARE;
@@ -329,36 +330,44 @@ minusf_expression ::= expression MINUS_DOT expression {extends=expression}
 star_expression ::= expression STAR expression {extends=expression}
 starf_expression ::= expression STAR_DOT expression {extends=expression}
 slash_expression ::= expression SLASH expression {extends=expression}
-shlashf_expression ::= expression SLASH_DOT expression {extends=expression}
+slashf_expression ::= expression SLASH_DOT expression {extends=expression}
 percent_expression ::= expression PERCENT expression {extends=expression}
 and_expression ::= expression AMPER_AMPER expression {extends=expression}
 or_expression ::= expression VBAR_VBAR expression {extends=expression}
 
-expression
-    ::= expression_unit
-    | eqeq_expression
-    | neq_expression
-    | lt_expression
+// precedence groupings - each group of expressions has equal precedence
+private equality_expression ::= eqeq_expression | neq_expression;
+private gt_lt_expression
+    ::= lt_expression
     | leq_expression
     | ltf_expression
     | lef_expression
     | gt_expression
-    | geq_expression
     | gtf_expression
+    | geq_expression
     | geqf_expression
-    | ltgt_expression
-    | pipe_expression
-    | plus_expression
+private plus_minus_expression
+    ::= plus_expression
     | plusf_expression
     | minus_expression
     | minusf_expression
-    | star_expression
+private mul_div_mod_concat_expression
+    ::= star_expression
     | starf_expression
     | slash_expression
-    | shlashf_expression
+    | slashf_expression
     | percent_expression
-    | and_expression
+    | ltgt_expression
+
+expression
+    ::= expression_unit
     | or_expression
+    | and_expression
+    | equality_expression
+    | gt_lt_expression
+    | pipe_expression
+    | mul_div_mod_concat_expression
+    | plus_minus_expression
 
 data_constructor_argument::= (label COLON)? type_base;
 data_constructor_arguments::= LEFT_PAREN (data_constructor_argument (COMMA data_constructor_argument)* (COMMA)?)? RIGHT_PAREN;
