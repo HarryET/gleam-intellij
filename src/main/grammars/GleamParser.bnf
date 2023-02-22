@@ -24,7 +24,7 @@
         IF= 'if';
         IMPORT= 'import';
         LET= 'let';
-        OPAQUE= 'opaque';
+        OPAQUE_KW= 'opaque';
         PUB= 'pub';
         TODO= 'todo';
         TRY= 'try';
@@ -88,7 +88,7 @@
         COMMENT_NORMAL= "regexp://.*"
         COMMENT_DOC= "regexp:///.*"
         COMMENT_MODULE= "regexp:////.*"
-        NAME= "regexp:[a-z_][_0-9a-z]*"
+        DOWN_NAME= "regexp:[a-z_][_0-9a-z]*"
         UP_NAME= "regexp:[A-Z][0-9a-zA-Z]*"
         DISCARD_NAME= "regexp:_[_0-9a-z]*"
         ID= "<ID>"
@@ -110,16 +110,16 @@ source_file::= (statement | expression_seq | target_group)*;
 // Enforce javascript | erlang with an intellij annotator
 target_group::= IF (identifier) LEFT_BRACE (statement)* RIGHT_BRACE;
 
-module ::= NAME (SLASH NAME)*;
+module ::= DOWN_NAME (SLASH DOWN_NAME)*;
 unqualified_import
-    ::= NAME (AS NAME)?
+    ::= DOWN_NAME (AS DOWN_NAME)?
     | UP_NAME (AS UP_NAME)?
     ;
 unqualified_imports
     ::= LEFT_BRACE (unqualified_import (COMMA unqualified_import)* (COMMA)?)? RIGHT_BRACE
     ;
 imports
-    ::= IMPORT module (DOT unqualified_imports)? (AS NAME)?
+    ::= IMPORT module (DOT unqualified_imports)? (AS DOWN_NAME)?
     ;
 
 constant_function_parameter_types
@@ -161,7 +161,7 @@ constant_type_annotation::= COLON constant_type;
 constant_field_access::= identifier DOT label;
 constant_value::= constant_tuple | constant_list | constant_bit_string | constant_record | identifier | constant_field_access | expression_literal;
 constant
-    ::= (visibility_modifier)? CONST NAME (constant_type_annotation)? EQUAL constant_value
+    ::= (visibility_modifier)? CONST identifier (constant_type_annotation)? EQUAL constant_value
     ;
 
 type_parameters::= LEFT_PAREN (type_parameter (COMMA type_parameter)* (COMMA)?)? RIGHT_PAREN;
@@ -172,7 +172,7 @@ function_parameter_types ::= LEFT_PAREN (type_base (COMMA type_base)* (COMMA)?)?
 tuple_type::= HASH LEFT_PAREN (type_base (COMMA type_base)* (COMMA)?)? RIGHT_PAREN;
 function_type::= FN (function_parameter_types)? R_ARROW type_base;
 
-type_base::= type_hole | tuple_type | function_type | type_rule | type_var;
+type_base::= type_rule | type_hole | tuple_type | function_type | type_var;
 type_annotation::= COLON type_base;
 type_argument::= type_base;
 type_arguments::= LEFT_PAREN (type_argument (COMMA type_argument)* (COMMA)?)? RIGHT_PAREN;
@@ -187,7 +187,7 @@ function_parameter_args::= labeled_discard_param | discard_param | labeled_name_
 function_parameter::= function_parameter_args (type_annotation)?;
 function_parameters::= LEFT_PAREN (function_parameter (COMMA function_parameter)* (COMMA)?)? RIGHT_PAREN;
 function_body::= LEFT_BRACE (expression_seq)? RIGHT_BRACE;
-function::= (visibility_modifier)? FN identifier function_parameters (R_ARROW type_base)? function_body;
+function::= (visibility_modifier)? FN identifier function_parameters (R_ARROW type_base)? function_body {pin=2};
 
 list_pattern_tail::= DOT_DOT (identifier | discard)?;
 list_pattern::= LEFT_SQUARE (pattern (COMMA pattern)* (COMMA)?)? (list_pattern_tail)? RIGHT_SQUARE;
@@ -379,14 +379,14 @@ statement
     ;
 
 ///// Aliases (maybe not needed by why not have them for now and we can delete later
-identifier::= NAME;
+identifier::= DOWN_NAME;
 constructor_name::= UP_NAME;
 type_identifier::= UP_NAME;
 discard::= DISCARD_NAME;
-label::= NAME;
-type_parameter::= NAME;
-type_var::= NAME;
-type_hole::= NAME;
+label::= DOWN_NAME;
+type_parameter::= DOWN_NAME;
+type_var::= DOWN_NAME;
+type_hole::= DOWN_NAME;
 hole::= DISCARD_NAME;
 discard_param::= discard;
 name_param::= identifier;
@@ -395,4 +395,4 @@ labeled_discard_param::= label discard;
 remote_constructor_name::= identifier DOT constructor_name;
 remote_type_identifier::= identifier DOT type_identifier;
 visibility_modifier::= PUB;
-opacity_modifier::= OPAQUE;
+opacity_modifier::= OPAQUE_KW;

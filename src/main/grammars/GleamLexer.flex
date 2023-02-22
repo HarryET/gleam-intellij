@@ -1,4 +1,4 @@
-package run.gleam.lang.core.parser;
+package run.gleam.lang.core.lexer;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
@@ -27,10 +27,10 @@ LINE_WS          = [\ \t]
 WHITE_SPACE_CHAR = {EOL_WS} | {LINE_WS}
 WHITE_SPACE      = {WHITE_SPACE_CHAR}+
 
-NAME=[a-z_][_0-9a-z]*
+DOWN_NAME=[a-z_][_0-9a-z]*
 UP_NAME=[A-Z][0-9a-zA-Z]*
 DISCARD_NAME=_[_0-9a-z]*
-IDENTIFIER= {NAME} | {UP_NAME} | {DISCARD_NAME}
+IDENTIFIER= {DOWN_NAME} | {UP_NAME} | {DISCARD_NAME}
 
 INTEGER = {DECIMAL} | {HEX} | {OCTAL} | {BINARY}
 DECIMAL=[0-9][0-9_]*
@@ -58,7 +58,7 @@ FLOAT=  '-'? {DECIMAL} '.' [0-9_]+ {DECIMAL}?   // 1.35, 1.35E-9, 0.3, -4.5
   "if"                  { return IF; }
   "import"              { return IMPORT; }
   "let"                 { return LET; }
-  "opaque"              { return OPAQUE; }
+  "opaque"              { return OPAQUE_KW; }
   "pub"                 { return PUB; }
   "todo"                { return TODO; }
   "try"                 { return TRY; }
@@ -113,7 +113,7 @@ FLOAT=  '-'? {DECIMAL} '.' [0-9_]+ {DECIMAL}?   // 1.35, 1.35E-9, 0.3, -4.5
   "///" .*              { return COMMENT_DOC; }
   "//" .*               { return COMMENT_NORMAL; }
   {DISCARD_NAME}        { return DISCARD_NAME; }
-  {NAME}                { return NAME; }
+  {DOWN_NAME}           { return DOWN_NAME; }
   {UP_NAME}             { return UP_NAME; }
   {INTEGER}             { return INTEGER; }
   {STRING}              { return STRING; }
