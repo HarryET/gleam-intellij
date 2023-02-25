@@ -106,6 +106,8 @@
     extends("(.+expr)") = expr
     extends("(.+call_or_access)") = call_or_access
 
+    name(".*expr")='expression'
+
     consumeTokenMethod("((?!.*_with_recover).*_recover)|(.*_first)|(.*expr)") = "consumeTokenFast"
 }
 
@@ -163,7 +165,7 @@ constant_type_special
     ;
 constant_type_annotation::= COLON constant_type;
 constant_field_access::= identifier DOT label;
-constant_value::= constant_tuple | constant_list | constant_bit_string | constant_record | identifier | constant_field_access | expression_literal;
+constant_value::= constant_tuple | constant_list | constant_bit_string | constant_record | identifier | constant_field_access | any_literal;
 constant
     ::= (visibility_modifier)? CONST identifier (constant_type_annotation)? EQUAL constant_value
     ;
@@ -205,7 +207,7 @@ pattern_spread::= (DOT_DOT (COMMA)?);
 record_pattern_argument::= (label COLON)? pattern;
 record_pattern_arguments::= LEFT_PAREN <<comma_separated_list record_pattern_argument>>? (pattern_spread)? RIGHT_PAREN;
 record_pattern::= (constructor_name | remote_constructor_name) (record_pattern_arguments)?;
-pattern::= (identifier | discard | record_pattern | expression_literal | tuple_pattern | pattern_bit_string | list_pattern) (AS identifier)?;
+pattern::= (identifier | discard | record_pattern | any_literal | tuple_pattern | pattern_bit_string | list_pattern) (AS identifier)?;
 
 try_rule::= TRY pattern (type_annotation)? EQUAL expr;
 expression_seq::= (expr | try_rule)+;
@@ -277,7 +279,11 @@ call_or_access
      | tuple_call_or_access
      | anonymous_function_call_or_access
 
-expression_literal::= STRING | INTEGER | FLOAT | TRUE | FALSE;
+any_literal ::= STRING | INTEGER | FLOAT | TRUE | FALSE {
+    consumeTokenMethod = "consumeTokenFast"
+}
+
+private any_literal_first ::= STRING | INTEGER | FLOAT | TRUE | FALSE
 
 record_expr ::= record 
 anonymous_function_expr ::= anonymous_function 
@@ -294,7 +300,7 @@ assert_expr ::= assert_rule
 negation_expr ::= negation 
 record_update_expr ::= record_update 
 call_or_access_expr ::= call_or_access 
-expression_literal_expr ::= expression_literal 
+expression_literal_expr ::= any_literal
 
 unit_expr
     ::= record_expr
