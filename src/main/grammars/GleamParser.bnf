@@ -101,14 +101,18 @@
         STRING="regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\\"|\\\'|\\)*\")"
         FLOAT="regexp:[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)"
     ]
-
     generateTokenAccessors=true
+
+    extends("(.+expr)") = expr
+    extends("(.+call_or_access)") = call_or_access
+
+    consumeTokenMethod("((?!.*_with_recover).*_recover)|(.*_first)|(.*expr)") = "consumeTokenFast"
 }
 
-source_file::= (statement | expression_seq | target_group)*;
+source_file ::= (statement | expression_seq | target_group)*;
 
 // Enforce javascript | erlang with an intellij annotator
-target_group::= IF (identifier) LEFT_BRACE (statement)* RIGHT_BRACE;
+target_group ::= IF (identifier) LEFT_BRACE (statement)* RIGHT_BRACE;
 
 module ::= DOWN_NAME (SLASH DOWN_NAME)*;
 unqualified_import
@@ -203,19 +207,19 @@ record_pattern_arguments::= LEFT_PAREN (record_pattern_argument (COMMA record_pa
 record_pattern::= (constructor_name | remote_constructor_name) (record_pattern_arguments)?;
 pattern::= (identifier | discard | record_pattern | expression_literal | tuple_pattern | pattern_bit_string | list_pattern) (AS identifier)?;
 
-try_rule::= TRY pattern (type_annotation)? EQUAL expression;
-expression_seq::= (expression | try_rule)+;
+try_rule::= TRY pattern (type_annotation)? EQUAL expr;
+expression_seq::= (expr | try_rule)+;
 
-argument::= (label ':')? (hole | expression);
+argument::= (label ':')? (hole | expr);
 arguments::= LEFT_PAREN (argument (COMMA argument)* (COMMA)?)? RIGHT_PAREN;
 record::= (constructor_name | remote_constructor_name) (arguments)?;
 
-expression_bit_string_segment::= expression_unit (COLON bit_string_segment_options)?;
+expression_bit_string_segment::= unit_expr (COLON bit_string_segment_options)?;
 expression_bit_string::= LT_LT (expression_bit_string_segment (COMMA expression_bit_string_segment)* (COMMA)?)? GT_GT;
 
 todo_rule::= TODO (LEFT_PAREN STRING RIGHT_PAREN)?;
-tuple::= HASH LEFT_PAREN (expression (COMMA expression)* (COMMA)?)? RIGHT_PAREN;
-list::= LEFT_SQUARE (expression ((COMMA expression)*)? (COMMA)? ('..' expression)?)? RIGHT_SQUARE;
+tuple::= HASH LEFT_PAREN (expr (COMMA expr)* (COMMA)?)? RIGHT_PAREN;
+list::= LEFT_SQUARE (expr ((COMMA expr)*)? (COMMA)? ('..' expr)?)? RIGHT_SQUARE;
 
 anonymous_function_parameter_args::= discard_param | name_param;
 anonymous_function_parameter::= anonymous_function_parameter_args (type_annotation)?;
@@ -235,31 +239,31 @@ case_clause_guard_expression
 case_clause_guard::= IF case_clause_guard_expression;
 case_clause_pattern::= pattern (COMMA pattern)*  (COMMA)?;
 case_clause_patterns::= case_clause_pattern (VBAR case_clause_pattern)* (VBAR)?;
-case_clause::= case_clause_patterns (case_clause_guard)? R_ARROW expression;
+case_clause::= case_clause_patterns (case_clause_guard)? R_ARROW expr;
 case_clauses::= (case_clause)+;
 case_subjects::= expression_seq;
 case_rule::= CASE case_subjects LEFT_BRACE case_clauses RIGHT_BRACE;
 
 use_args::= identifier | identifier COMMA use_args;
-use_rule::= USE (use_args)? L_ARROW expression;
+use_rule::= USE (use_args)? L_ARROW expr;
 
-assignment::= pattern (type_annotation)? EQUAL expression;
+assignment::= pattern (type_annotation)? EQUAL expr;
 let_rule::= LET assignment;
 assert_rule::= ASSERT assignment;
-negation::= BANG expression_unit;
+negation::= BANG unit_expr;
 
-record_update_argument::= label COLON expression;
+record_update_argument::= label COLON expr;
 record_update_arguments::= record_update_argument (COMMA record_update_argument)* (COMMA)?;
-record_update::= (constructor_name | remote_constructor_name) LEFT_PAREN DOT_DOT expression COMMA record_update_arguments RIGHT_PAREN;
+record_update::= (constructor_name | remote_constructor_name) LEFT_PAREN DOT_DOT expr COMMA record_update_arguments RIGHT_PAREN;
 
-self_call_or_access ::= call_or_access call_or_access_options {extends=call_or_access}
-case_call_or_access ::= case_rule call_or_access_options {extends=call_or_access}
-identifier_call_or_access ::= identifier call_or_access_options {extends=call_or_access}
-expression_group_call_or_access ::= identifier call_or_access_options {extends=call_or_access}
-record_call_or_access ::= record DOT label {extends=call_or_access}
-record_update_call_or_access ::= record_update DOT label {extends=call_or_access}
-tuple_call_or_access ::= tuple DOT INTEGER {extends=call_or_access}
-anonymous_function_call_or_access ::= anonymous_function arguments {extends=call_or_access}
+self_call_or_access ::= call_or_access call_or_access_options
+case_call_or_access ::= case_rule call_or_access_options
+identifier_call_or_access ::= identifier call_or_access_options
+expression_group_call_or_access ::= identifier call_or_access_options
+record_call_or_access ::= record DOT label
+record_update_call_or_access ::= record_update DOT label
+tuple_call_or_access ::= tuple DOT INTEGER
+anonymous_function_call_or_access ::= anonymous_function arguments
 call_or_access_options::= arguments | (DOT label) | (DOT INTEGER);
 
 // this deviates from the treesitter spec - it is function_call + field_access + tuple_access all in one rule to avoid indirect left recursion
@@ -275,99 +279,99 @@ call_or_access
 
 expression_literal::= STRING | INTEGER | FLOAT | TRUE | FALSE;
 
-record_expression ::= record {extends=expression}
-anonymous_function_expression ::= anonymous_function {extends=expression}
-identifier_expression ::= identifier {extends=expression}
-todo_expression ::= todo_rule {extends=expression}
-tuple_expression ::= tuple {extends=expression}
-list_expression ::= list {extends=expression}
-expression_bit_string_expression ::= expression_bit_string {extends=expression}
-expression_group_expression ::= expression_group {extends=expression}
-case_expression ::= case_rule {extends=expression}
-let_expression ::= let_rule {extends=expression}
-use_expression ::= use_rule {extends=expression}
-assert_expression ::= assert_rule {extends=expression}
-negation_expression ::= negation {extends=expression}
-record_update_expression ::= record_update {extends=expression}
-call_or_access_expression ::= call_or_access {extends=expression}
-expression_literal_expression ::= expression_literal {extends=expression}
+record_expr ::= record 
+anonymous_function_expr ::= anonymous_function 
+identifier_expr ::= identifier 
+todo_expr ::= todo_rule 
+tuple_expr ::= tuple 
+list_expr ::= list 
+expression_bit_string_expr ::= expression_bit_string 
+expression_group_expr ::= expression_group 
+case_expr ::= case_rule 
+let_expr ::= let_rule 
+use_expr ::= use_rule 
+assert_expr ::= assert_rule 
+negation_expr ::= negation 
+record_update_expr ::= record_update 
+call_or_access_expr ::= call_or_access 
+expression_literal_expr ::= expression_literal 
 
-expression_unit
-    ::= record_expression
-    | anonymous_function_expression
-    | call_or_access_expression
-    | todo_expression
-    | tuple_expression
-    | list_expression
-    | expression_bit_string_expression
-    | expression_group_expression
-    | case_expression
-    | let_expression
-    | use_expression
-    | assert_expression
-    | negation_expression
-    | record_update_expression
-    | expression_literal_expression
-    | identifier_expression
-    {extends=expression}
+unit_expr
+    ::= record_expr
+    | anonymous_function_expr
+    | call_or_access_expr
+    | todo_expr
+    | tuple_expr
+    | list_expr
+    | expression_bit_string_expr
+    | expression_group_expr
+    | case_expr
+    | let_expr
+    | use_expr
+    | assert_expr
+    | negation_expr
+    | record_update_expr
+    | expression_literal_expr
+    | identifier_expr
+    
 
-eqeq_expression ::= expression EQUAL_EQUAL expression {extends=expression}
-neq_expression ::= expression NOT_EQUAL expression {extends=expression}
-lt_expression ::= expression LESS expression {extends=expression}
-leq_expression ::= expression LESS_EQUAL expression {extends=expression}
-ltf_expression ::= expression LESS_DOT expression {extends=expression}
-lef_expression ::= expression LESS_EQUAL_DOT expression {extends=expression}
-gt_expression ::= expression GREATER expression {extends=expression}
-geq_expression ::= expression GREATER_EQUAL expression {extends=expression}
-gtf_expression ::= expression GREATER_DOT expression {extends=expression}
-geqf_expression ::= expression GREATER_EQUAL_DOT expression {extends=expression}
-ltgt_expression ::= expression LT_GT expression {extends=expression}
-pipe_expression ::= expression PIPE expression {extends=expression}
-plus_expression ::= expression PLUS expression {extends=expression}
-plusf_expression ::= expression PLUS_DOT expression {extends=expression}
-minus_expression ::= expression MINUS expression {extends=expression}
-minusf_expression ::= expression MINUS_DOT expression {extends=expression}
-star_expression ::= expression STAR expression {extends=expression}
-starf_expression ::= expression STAR_DOT expression {extends=expression}
-slash_expression ::= expression SLASH expression {extends=expression}
-slashf_expression ::= expression SLASH_DOT expression {extends=expression}
-percent_expression ::= expression PERCENT expression {extends=expression}
-and_expression ::= expression AMPER_AMPER expression {extends=expression}
-or_expression ::= expression VBAR_VBAR expression {extends=expression}
+eqeq_expr ::= expr EQUAL_EQUAL expr 
+neq_expr ::= expr NOT_EQUAL expr 
+lt_expr ::= expr LESS expr 
+leq_expr ::= expr LESS_EQUAL expr 
+ltf_expr ::= expr LESS_DOT expr 
+lef_expr ::= expr LESS_EQUAL_DOT expr 
+gt_expr ::= expr GREATER expr 
+geq_expr ::= expr GREATER_EQUAL expr 
+gtf_expr ::= expr GREATER_DOT expr 
+geqf_expr ::= expr GREATER_EQUAL_DOT expr 
+ltgt_expr ::= expr LT_GT expr 
+pipe_expr ::= expr PIPE expr 
+plus_expr ::= expr PLUS expr 
+plusf_expr ::= expr PLUS_DOT expr 
+minus_expr ::= expr MINUS expr 
+minusf_expr ::= expr MINUS_DOT expr 
+star_expr ::= expr STAR expr 
+starf_expr ::= expr STAR_DOT expr 
+slash_expr ::= expr SLASH expr 
+slashf_expr ::= expr SLASH_DOT expr 
+percent_expr ::= expr PERCENT expr 
+and_expr ::= expr AMPER_AMPER expr 
+or_expr ::= expr VBAR_VBAR expr 
 
 // precedence groupings - each group of expressions has equal precedence
-private equality_expression ::= eqeq_expression | neq_expression;
-private gt_lt_expression
-    ::= lt_expression
-    | leq_expression
-    | ltf_expression
-    | lef_expression
-    | gt_expression
-    | gtf_expression
-    | geq_expression
-    | geqf_expression
-private plus_minus_expression
-    ::= plus_expression
-    | plusf_expression
-    | minus_expression
-    | minusf_expression
-private mul_div_mod_concat_expression
-    ::= star_expression
-    | starf_expression
-    | slash_expression
-    | slashf_expression
-    | percent_expression
-    | ltgt_expression
+private equality_expr ::= eqeq_expr | neq_expr;
+private gt_lt_expr
+    ::= lt_expr
+    | leq_expr
+    | ltf_expr
+    | lef_expr
+    | gt_expr
+    | gtf_expr
+    | geq_expr
+    | geqf_expr
+private plus_minus_expr
+    ::= plus_expr
+    | plusf_expr
+    | minus_expr
+    | minusf_expr
+private mul_div_mod_concat_expr
+    ::= star_expr
+    | starf_expr
+    | slash_expr
+    | slashf_expr
+    | percent_expr
+    | ltgt_expr
 
-expression
-    ::= expression_unit
-    | or_expression
-    | and_expression
-    | equality_expression
-    | gt_lt_expression
-    | pipe_expression
-    | mul_div_mod_concat_expression
-    | plus_minus_expression
+expr
+    ::= unit_expr
+    | or_expr
+    | and_expr
+    | equality_expr
+    | gt_lt_expr
+    | pipe_expr
+    | mul_div_mod_concat_expr
+    | plus_minus_expr
 
 data_constructor_argument::= (label COLON)? type_base;
 data_constructor_arguments::= LEFT_PAREN (data_constructor_argument (COMMA data_constructor_argument)* (COMMA)?)? RIGHT_PAREN;
