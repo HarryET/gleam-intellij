@@ -29,5 +29,5 @@ class GleamParserDefinition : ParserDefinition {
     override fun getFileNodeType(): IFileElementType = file
     override fun getCommentTokens(): TokenSet = comments
     override fun getWhitespaceTokens(): TokenSet = whiteSpace
-    override fun getStringLiteralElements(): TokenSet = TokenSet.EMPTY
+    override fun getStringLiteralElements(): TokenSet = TokenSet.create(GleamTypes.STRING)
 }
