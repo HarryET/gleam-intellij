@@ -172,7 +172,7 @@ constant
 
 type_parameters::= LEFT_PAREN <<comma_separated_list type_parameter>>? RIGHT_PAREN;
 type_name::= (type_identifier | remote_type_identifier) (type_parameters)?  ;
-external_type::= (visibility_modifier)? EXTERNAL TYPE type_name;
+external_type::= TYPE type_name;
 
 function_parameter_types ::= LEFT_PAREN <<comma_separated_list type_base>>? RIGHT_PAREN;
 tuple_type::= HASH LEFT_PAREN <<comma_separated_list type_base>>? RIGHT_PAREN;
@@ -187,14 +187,15 @@ type_rule::= (type_identifier | remote_type_identifier) (type_arguments)?;
 external_function_body::= STRING STRING;
 external_function_parameter::= (identifier COLON)? type_base;
 external_function_parameters::= LEFT_PAREN <<comma_separated_list external_function_parameter>>? RIGHT_PAREN;
-external_function::= (visibility_modifier)? EXTERNAL FN identifier external_function_parameters R_ARROW type_base EQUAL external_function_body;
+external_function::= FN identifier external_function_parameters R_ARROW type_base EQUAL external_function_body;
+
+private external_statement ::= (visibility_modifier)? EXTERNAL (external_function | external_type);
 
 function_parameter_args::= labeled_discard_param | discard_param | labeled_name_param | name_param;
 function_parameter::= function_parameter_args (type_annotation)?;
 function_parameters::= LEFT_PAREN <<comma_separated_list function_parameter>>? RIGHT_PAREN;
 function_body::= LEFT_BRACE (expression_seq)? RIGHT_BRACE;
-function::= (visibility_modifier)? FN identifier function_parameters (R_ARROW type_base)? function_body {pin=2 recoverWhile=function_recover};
-private function_recover::= !(LEFT_BRACE)
+function::= (visibility_modifier)? FN identifier function_parameters (R_ARROW type_base)? function_body;
 
 list_pattern_tail::= DOT_DOT (identifier | discard)?;
 list_pattern::= LEFT_SQUARE <<comma_separated_list pattern>>? (list_pattern_tail)? RIGHT_SQUARE;
@@ -384,17 +385,16 @@ data_constructor_arguments::= LEFT_PAREN <<comma_separated_list data_constructor
 data_constructor::= constructor_name (data_constructor_arguments)?;
 data_constructors::= (data_constructor)+;
 
-type_definition::= (visibility_modifier)? (opacity_modifier)? TYPE type_name LEFT_BRACE data_constructors RIGHT_BRACE;
-type_alias::= (visibility_modifier)? (opacity_modifier)? TYPE type_name EQUAL type_rule;
+type_definition ::= LEFT_BRACE data_constructors RIGHT_BRACE;
+type_alias ::= EQUAL type_rule;
+private type_statement ::= (visibility_modifier)? (opacity_modifier)? TYPE type_name (type_definition | type_alias);
 
 statement
     ::= imports
     | constant
-    | external_type
-    | external_function
+    | type_statement
+    | external_statement
     | function
-    | type_definition
-    | type_alias
     ;
 
 ///// Aliases (maybe not needed by why not have them for now and we can delete later
