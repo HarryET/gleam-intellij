@@ -215,7 +215,6 @@ expression_seq::= (expr | try_rule)+;
 
 argument::= (label ':')? (hole | expr);
 arguments::= LEFT_PAREN <<comma_separated_list argument>>? RIGHT_PAREN;
-record::= (constructor_name | remote_constructor_name) (arguments)?;
 
 expression_bit_string_segment::= unit_expr (COLON bit_string_segment_options)?;
 expression_bit_string::= LT_LT <<comma_separated_list expression_bit_string_segment>>? GT_GT;
@@ -257,14 +256,13 @@ negation::= BANG unit_expr;
 
 record_update_argument::= label COLON expr;
 record_update_arguments::= <<comma_separated_list record_update_argument>>;
-record_update::= (constructor_name | remote_constructor_name) LEFT_PAREN DOT_DOT expr COMMA record_update_arguments RIGHT_PAREN;
+record_update::= LEFT_PAREN DOT_DOT expr COMMA record_update_arguments RIGHT_PAREN;
 
 self_call_or_access ::= call_or_access call_or_access_options
 case_call_or_access ::= case_rule call_or_access_options
 identifier_call_or_access ::= identifier call_or_access_options
 expression_group_call_or_access ::= expression_group call_or_access_options
-record_call_or_access ::= record DOT label
-record_update_call_or_access ::= record_update DOT label
+record_call_or_access ::= record_expr DOT label
 tuple_call_or_access ::= tuple DOT INTEGER
 anonymous_function_call_or_access ::= anonymous_function arguments
 call_or_access_options::= arguments | (DOT label) | (DOT INTEGER);
@@ -276,7 +274,6 @@ call_or_access
      | identifier_call_or_access
      | expression_group_call_or_access
      | record_call_or_access
-     | record_update_call_or_access
      | tuple_call_or_access
      | anonymous_function_call_or_access
 
@@ -286,22 +283,20 @@ any_literal ::= STRING | INTEGER | FLOAT | TRUE | FALSE {
 
 private any_literal_first ::= STRING | INTEGER | FLOAT | TRUE | FALSE
 
-record_expr ::= record 
+record_expr ::= (constructor_name | remote_constructor_name) (arguments | record_update)?
 anonymous_function_expr ::= anonymous_function
-identifier_spread_expr ::= DOT_DOT? identifier // using dotdot here might be illegal in some scenarios, probably easier to make a lint error after
 identifier_expr ::= identifier
-todo_expr ::= todo_rule 
-tuple_expr ::= tuple 
-list_expr ::= list 
-expression_bit_string_expr ::= expression_bit_string 
-expression_group_expr ::= expression_group 
-case_expr ::= case_rule 
-let_expr ::= let_rule 
-use_expr ::= use_rule 
-assert_expr ::= assert_rule 
-negation_expr ::= negation 
-record_update_expr ::= record_update 
-call_or_access_expr ::= call_or_access 
+todo_expr ::= todo_rule
+tuple_expr ::= tuple
+list_expr ::= list
+expression_bit_string_expr ::= expression_bit_string
+expression_group_expr ::= expression_group
+case_expr ::= case_rule
+let_expr ::= let_rule
+use_expr ::= use_rule
+assert_expr ::= assert_rule
+negation_expr ::= negation
+call_or_access_expr ::= call_or_access
 expression_literal_expr ::= any_literal
 
 unit_expr
@@ -318,11 +313,8 @@ unit_expr
     | use_expr
     | assert_expr
     | negation_expr
-    | record_update_expr
     | expression_literal_expr
     | identifier_expr
-    | identifier_spread_expr
-    
 
 eqeq_expr ::= expr EQUAL_EQUAL expr 
 neq_expr ::= expr NOT_EQUAL expr 
