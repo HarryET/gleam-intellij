@@ -25,6 +25,7 @@
         IMPORT= 'import';
         LET= 'let';
         OPAQUE_KW= 'opaque';
+        PANIC='panic'
         PUB= 'pub';
         TODO= 'todo';
         TRY= 'try';
@@ -220,6 +221,7 @@ expression_bit_string_segment::= unit_expr (COLON bit_string_segment_options)?;
 expression_bit_string::= LT_LT <<comma_separated_list expression_bit_string_segment>>? GT_GT;
 
 todo_rule::= TODO (LEFT_PAREN STRING RIGHT_PAREN)?;
+panic_rule ::= PANIC;
 tuple::= HASH LEFT_PAREN <<comma_separated_list expr>>? RIGHT_PAREN;
 list::= LEFT_SQUARE (expr ((COMMA expr)*)? (COMMA)? ('..' expr)?)? RIGHT_SQUARE;
 
@@ -287,6 +289,7 @@ record_expr ::= (constructor_name | remote_constructor_name) (arguments | record
 anonymous_function_expr ::= anonymous_function
 identifier_expr ::= identifier
 todo_expr ::= todo_rule
+panic_expr ::= panic_rule
 tuple_expr ::= tuple
 list_expr ::= list
 expression_bit_string_expr ::= expression_bit_string
@@ -304,6 +307,7 @@ unit_expr
     | anonymous_function_expr
     | call_or_access_expr
     | todo_expr
+    | panic_expr
     | tuple_expr
     | list_expr
     | expression_bit_string_expr

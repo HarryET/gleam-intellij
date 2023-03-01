@@ -27,23 +27,22 @@ LINE_WS          = [\ \t]
 WHITE_SPACE_CHAR = {EOL_WS} | {LINE_WS}
 WHITE_SPACE      = {WHITE_SPACE_CHAR}+
 
-DOWN_NAME=[a-z_][_0-9a-z]*
-UP_NAME=[A-Z][0-9a-zA-Z]*
-DISCARD_NAME=_[_0-9a-z]*
-IDENTIFIER= {DOWN_NAME} | {UP_NAME} | {DISCARD_NAME}
+DOWN_NAME        = [a-z_][_0-9a-z]*
+UP_NAME          = [A-Z][0-9a-zA-Z]*
+DISCARD_NAME     = _[_0-9a-z]*
+IDENTIFIER       = {DOWN_NAME} | {UP_NAME} | {DISCARD_NAME}
 
-INTEGER = {DECIMAL} | {HEX} | {OCTAL} | {BINARY}
-DECIMAL=[0-9][0-9_]*
-HEX=0x[a-fA-F0-9_]*
-OCTAL=0o[0-7_]*
-BINARY=0b[01_]*
+INTEGER          = {DECIMAL} | {HEX} | {OCTAL} | {BINARY}
+DECIMAL          = -? [0-9][0-9_]*
+HEX              = -? 0x[a-fA-F0-9_]*
+OCTAL            = -? 0o[0-7_]*
+BINARY           = -? 0b[01_]*
 
-ESC= '\\' [\"\bfnrt]
-STRING= '\"' ({ESC} | ~[\"\\])* '\"'
-EXPONENT      = [eE] [-+]? [0-9_]+
-FLOAT=  '-'? {DECIMAL} '.' [0-9_]+ {DECIMAL}?   // 1.35, 1.35E-9, 0.3, -4.5
-    |   '-'? {DECIMAL} '.'
-    |   '-'? {DECIMAL} {EXPONENT}               // 1e10 -3e4
+STRING           = ('([^'\\]|\\.)*'|\"([^\"\\]|\\\"|\\\'|\\)*\")
+EXPONENT         = [eE] [-+]? [0-9_]+
+FLOAT            =  '-'? {DECIMAL} '.' [0-9_]+ {DECIMAL}?   // 1.35, 1.35E-9, 0.3, -4.5
+                   |   '-'? {DECIMAL} '.'
+                   |   '-'? {DECIMAL} {EXPONENT}               // 1e10 -3e4
 
 
 %%
@@ -59,6 +58,7 @@ FLOAT=  '-'? {DECIMAL} '.' [0-9_]+ {DECIMAL}?   // 1.35, 1.35E-9, 0.3, -4.5
   "import"              { return IMPORT; }
   "let"                 { return LET; }
   "opaque"              { return OPAQUE_KW; }
+  "panic"               { return PANIC; }
   "pub"                 { return PUB; }
   "todo"                { return TODO; }
   "try"                 { return TRY; }
