@@ -40,9 +40,9 @@ BINARY           = -? 0b[01_]*
 
 STRING           = ('([^'\\]|\\.)*'|\"([^\"\\]|\\\"|\\\'|\\)*\")
 EXPONENT         = [eE] [-+]? [0-9_]+
-FLOAT            =  '-'? {DECIMAL} '.' [0-9_]+ {DECIMAL}?   // 1.35, 1.35E-9, 0.3, -4.5
-                   |   '-'? {DECIMAL} '.'
-                   |   '-'? {DECIMAL} {EXPONENT}               // 1e10 -3e4
+FLOAT            =   {DECIMAL} [.] [0-9_]+ ([0-9][0-9_]*)? {EXPONENT}?  // 1.35, 1.35E-9, 0.3, -4.5
+                   | {DECIMAL} [.]
+                   | {DECIMAL} {EXPONENT}                               // 1e10 -3e4
 
 
 %%

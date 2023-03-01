@@ -97,7 +97,7 @@
         HEX = "regexp:0x[a-fA-F0-9_]*"
         OCTAL = "regexp:0o[0-7_]*"
         BINARY = "regexp:0b[01_]*"
-        INTEGER = "regexp:0b[01_]*|regexp:0o[0-7_]*|regexp:0x[a-fA-F0-9_]*|regexp:[0-9][0-9_]*"
+        INTEGER = "regexp:0b[01_]*|0o[0-7_]*|0x[a-fA-F0-9_]*|[0-9][0-9_]*"
         WHITE_SPACE = "regexp:\s+"
         STRING="regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\\"|\\\'|\\)*\")"
         FLOAT="regexp:[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)"
@@ -208,8 +208,8 @@ tuple_pattern::= HASH LEFT_PAREN <<comma_separated_list pattern>>? RIGHT_PAREN;
 pattern_spread::= (DOT_DOT (COMMA)?);
 record_pattern_argument::= (label COLON)? pattern;
 record_pattern_arguments::= LEFT_PAREN <<comma_separated_list record_pattern_argument>>? (pattern_spread)? RIGHT_PAREN;
-record_pattern::= (constructor_name | remote_constructor_name) (record_pattern_arguments)?;
-pattern::= (identifier | discard | record_pattern | any_literal | tuple_pattern | pattern_bit_string | list_pattern) (AS identifier)?;
+record_pattern_or_identifier::= (constructor_name | (identifier remote_constructor_name_suffix?)) (record_pattern_arguments)?;
+pattern::= (record_pattern_or_identifier | discard | tuple_pattern | pattern_bit_string | list_pattern | any_literal) (AS identifier)?;
 
 try_rule::= TRY pattern (type_annotation)? EQUAL expr;
 expression_seq::= (expr | try_rule)+;
@@ -410,6 +410,7 @@ name_param::= identifier;
 labeled_name_param::= label identifier;
 labeled_discard_param::= label discard;
 remote_constructor_name::= identifier DOT constructor_name;
+remote_constructor_name_suffix::= DOT constructor_name;
 remote_type_identifier::= identifier DOT type_identifier;
 visibility_modifier::= PUB;
 opacity_modifier::= OPAQUE_KW;
