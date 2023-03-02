@@ -30,4 +30,16 @@ class GleamParserDefinition : ParserDefinition {
     override fun getCommentTokens(): TokenSet = comments
     override fun getWhitespaceTokens(): TokenSet = whiteSpace
     override fun getStringLiteralElements(): TokenSet = TokenSet.create(GleamTypes.STRING)
+
+    companion object {
+        /**
+         * Should be increased after any change of lexer rules
+         */
+        const val LEXER_VERSION: Int = 1
+
+        /**
+         * Should be increased after any change of parser rules
+         */
+        const val PARSER_VERSION: Int = LEXER_VERSION + 1
+    }
 }
