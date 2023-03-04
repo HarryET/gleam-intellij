@@ -1,6 +1,10 @@
 package run.gleam.lang.core.stubs
 
+import com.intellij.psi.PsiElement
+import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.stubs.PsiFileStubImpl
+import com.intellij.psi.stubs.StubBase
+import com.intellij.psi.stubs.StubElement
 import com.intellij.psi.tree.IStubFileElementType
 import run.gleam.lang.GleamLanguage
 import run.gleam.lang.core.parser.GleamParserDefinition
@@ -22,3 +26,10 @@ class GleamFileStub(
 //fun factory(name: String): GleamStubElementType<*, *> = when (name) {
 //    else -> error("Unknown element $name")
 //}
+
+abstract class GleamFlagOwnerStubBase<T: PsiElement>(
+    parent: StubElement<*>?,
+    elementType: IStubElementType<*, *>
+) : StubBase<T>(parent, elementType) {
+    protected abstract val flags: Int
+}
