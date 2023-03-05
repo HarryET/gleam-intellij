@@ -2,6 +2,8 @@
     parserClass='run.gleam.lang.core.parser.GleamParser'
     parserUtilClass='run.gleam.lang.core.parser.GleamParserUtil'
 
+    implements='run.gleam.lang.core.psi.ext.GleamElement'
+//    extends='run.gleam.lang.core.psi.ext.GleamElementImpl'
     extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
     psiClassPrefix="Gleam"

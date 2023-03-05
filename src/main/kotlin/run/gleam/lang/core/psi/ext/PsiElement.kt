@@ -16,6 +16,7 @@ import com.intellij.psi.util.prevLeaf
 import com.intellij.util.SmartList
 import run.gleam.lang.core.psi.GleamFile
 import run.gleam.lang.core.stubs.GleamFileStub
+import run.gleam.openapiext.document
 
 val PsiFileSystemItem.sourceRoot: VirtualFile?
     get() = virtualFile.let { ProjectRootManager.getInstance(project).fileIndex.getSourceRootForFile(it) }
@@ -259,6 +260,23 @@ fun PsiElement.rangeWithPrevSpace(prev: PsiElement?): TextRange =
 val PsiElement.rangeWithPrevSpace: TextRange
     get() = rangeWithPrevSpace(prevLeaf())
 
+private fun PsiElement.getLineCount(): Int {
+    val doc = containingFile?.document
+    if (doc != null) {
+        val spaceRange = textRange ?: TextRange.EMPTY_RANGE
+
+        if (spaceRange.endOffset <= doc.textLength) {
+            val startLine = doc.getLineNumber(spaceRange.startOffset)
+            val endLine = doc.getLineNumber(spaceRange.endOffset)
+
+            return endLine - startLine
+        }
+    }
+
+    return (text ?: "").count { it == '\n' } + 1
+}
+
+fun PsiWhiteSpace.isMultiLine(): Boolean = getLineCount() > 1
 @Suppress("UNCHECKED_CAST")
 inline val <T : StubElement<*>> StubBasedPsiElement<T>.greenStub: T?
     get() = (this as? StubBasedPsiElementBase<T>)?.greenStub
