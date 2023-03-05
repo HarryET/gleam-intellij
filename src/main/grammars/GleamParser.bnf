@@ -207,9 +207,9 @@ pattern_bit_string_segment::= pattern (COLON bit_string_segment_options)?;
 pattern_bit_string::= LT_LT <<comma_separated_list pattern_bit_string_segment>>? GT_GT { pin = 1 };
 
 tuple_pattern::= HASH LEFT_PAREN <<comma_separated_list pattern>>? RIGHT_PAREN { pin = 2 };
-pattern_spread::= (DOT_DOT (COMMA)?);
+pattern_spread::= (DOT_DOT (COMMA)?) {pin = 1};
 record_pattern_argument::= (label COLON)? pattern;
-record_pattern_arguments::= LEFT_PAREN <<comma_separated_list record_pattern_argument>>? (pattern_spread)? RIGHT_PAREN;
+record_pattern_arguments::= LEFT_PAREN <<comma_separated_list record_pattern_argument>>? (pattern_spread)? RIGHT_PAREN { pin = 1 };
 record_pattern_or_identifier::= (constructor_name | (identifier remote_constructor_name_suffix?)) (record_pattern_arguments)?;
 pattern::= (record_pattern_or_identifier | discard | tuple_pattern | pattern_bit_string | list_pattern | any_literal) (AS identifier)?;
 
@@ -217,7 +217,7 @@ try_rule::= TRY pattern (type_annotation)? EQUAL expr { pin = 1 };
 expression_seq::= (expr | try_rule)+;
 
 argument::= (label ':')? (hole | expr);
-arguments::= LEFT_PAREN <<comma_separated_list argument>>? RIGHT_PAREN { pin = 1 };
+arguments::= LEFT_PAREN <<comma_separated_list argument>>? RIGHT_PAREN;
 
 expression_bit_string_segment::= unit_expr (COLON bit_string_segment_options)?;
 expression_bit_string::= LT_LT <<comma_separated_list expression_bit_string_segment>>? GT_GT { pin = 1 };
@@ -232,7 +232,7 @@ anonymous_function_parameter::= anonymous_function_parameter_args (type_annotati
 anonymous_function_parameters::= LEFT_PAREN (anonymous_function_parameter (COMMA anonymous_function_parameter)* (COMMA)?)? RIGHT_PAREN;
 anonymous_function::= FN anonymous_function_parameters (R_ARROW type_rule)? function_body;
 
-expression_group::= LEFT_BRACE expression_seq RIGHT_BRACE { pin = 1 };
+expression_group::= LEFT_BRACE expression_seq RIGHT_BRACE;
 
 case_clause_tuple_access::= identifier DOT INTEGER;
 case_clause_guard_unit::= (identifier | case_clause_tuple_access | LEFT_BRACE case_clause_guard_expression RIGHT_BRACE | constant_value) {extends=case_clause_guard_expression};
@@ -248,7 +248,7 @@ case_clause_patterns::= case_clause_pattern (VBAR case_clause_pattern)* (VBAR)?;
 case_clause::= case_clause_patterns (case_clause_guard)? R_ARROW expr;
 case_clauses::= (case_clause)+;
 case_subjects::= expression_seq;
-case_body ::= LEFT_BRACE case_clauses RIGHT_BRACE { pin = 1 }
+case_body ::= LEFT_BRACE case_clauses RIGHT_BRACE
 case_rule::= CASE case_subjects case_body { pin = 1 };
 
 use_args::= identifier | identifier COMMA use_args;
