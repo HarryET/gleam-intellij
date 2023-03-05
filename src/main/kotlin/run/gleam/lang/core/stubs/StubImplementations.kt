@@ -8,7 +8,9 @@ import com.intellij.psi.stubs.StubElement
 import com.intellij.psi.tree.IStubFileElementType
 import run.gleam.lang.GleamLanguage
 import run.gleam.lang.core.parser.GleamParserDefinition
+import run.gleam.lang.core.psi.GleamExternalFunction
 import run.gleam.lang.core.psi.GleamFile
+import run.gleam.lang.core.psi.GleamFunction
 
 class GleamFileStub(
     file: GleamFile?,
@@ -32,4 +34,20 @@ abstract class GleamFlagOwnerStubBase<T: PsiElement>(
     elementType: IStubElementType<*, *>
 ) : StubBase<T>(parent, elementType) {
     protected abstract val flags: Int
+}
+
+class GleamFunctionStub(
+    parent: StubElement<*>?, elementType: IStubElementType<*, *>,
+    override val name: String?,
+    override val flags: Int
+) : GleamNamedStub, GleamFlagOwnerStubBase<GleamFunction>(parent, elementType) {
+
+}
+
+class GleamExternalFunctionStub(
+    parent: StubElement<*>?, elementType: IStubElementType<*, *>,
+    override val name: String?,
+    override val flags: Int
+) : GleamNamedStub, GleamFlagOwnerStubBase<GleamExternalFunction>(parent, elementType) {
+
 }

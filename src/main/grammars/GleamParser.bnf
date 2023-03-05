@@ -123,29 +123,29 @@ unqualified_import
     | UP_NAME (AS UP_NAME)?
     ;
 unqualified_imports
-    ::= LEFT_BRACE <<comma_separated_list unqualified_import>>? RIGHT_BRACE
+    ::= LEFT_BRACE <<comma_separated_list unqualified_import>>? RIGHT_BRACE { pin = 1 }
     ;
 imports
-    ::= IMPORT module (DOT unqualified_imports)? (AS DOWN_NAME)?
+    ::= IMPORT module (DOT unqualified_imports)? (AS DOWN_NAME)? { pin = 1 }
     ;
 
 constant_function_parameter_types
-    ::= LEFT_PAREN <<comma_separated_list constant_type_special>>? RIGHT_PAREN;
+    ::= LEFT_PAREN <<comma_separated_list constant_type_special>>? RIGHT_PAREN { pin = 1 };
 constant_type_function
     ::= FN (constant_function_parameter_types)? R_ARROW constant_type_special
     ;
 
-constant_tuple::= HASH LEFT_PAREN <<comma_separated_list constant_value>>? RIGHT_PAREN;
+constant_tuple::= HASH LEFT_PAREN <<comma_separated_list constant_value>>? RIGHT_PAREN { pin = 2 };
 constant_type_tuple
-    ::= HASH LEFT_PAREN <<comma_separated_list constant_type_special>>? RIGHT_PAREN;
+    ::= HASH LEFT_PAREN <<comma_separated_list constant_type_special>>? RIGHT_PAREN { pin = 2 };
 
 constant_type_argument::= constant_type_special;
-constant_type_arguments::= LEFT_PAREN <<comma_separated_list constant_type_argument>>? RIGHT_PAREN;
+constant_type_arguments::= LEFT_PAREN <<comma_separated_list constant_type_argument>>? RIGHT_PAREN { pin = 1 };
 
-constant_list::= LEFT_SQUARE <<comma_separated_list constant_value>>? RIGHT_SQUARE;
+constant_list::= LEFT_SQUARE <<comma_separated_list constant_value>>? RIGHT_SQUARE {pin = 1}
 
 constant_record_argument::= (label COLON)? constant_value;
-constant_record_arguments::= LEFT_PAREN <<comma_separated_list constant_record_argument>>? RIGHT_PAREN;
+constant_record_arguments::= LEFT_PAREN <<comma_separated_list constant_record_argument>>? RIGHT_PAREN { pin = 1 };
 constant_record ::= (constructor_name | remote_constructor_name) (constant_record_arguments)?;
 
 bit_string_segment_option_size ::= identifier LEFT_PAREN INTEGER RIGHT_PAREN;
@@ -155,7 +155,7 @@ bit_string_named_segment_option::= identifier | bit_string_segment_option_size;
 bit_string_segment_option::= bit_string_named_segment_option | INTEGER;
 bit_string_segment_options::= bit_string_segment_option (MINUS bit_string_segment_option)*  (MINUS)?;
 constant_bit_string_segment::= constant_value (COLON bit_string_segment_options)?;
-constant_bit_string::= LT_LT <<comma_separated_list constant_bit_string_segment>>? GT_GT;
+constant_bit_string::= LT_LT <<comma_separated_list constant_bit_string_segment>>? GT_GT { pin = 1 };
 
 constant_type::= (type_identifier | remote_type_identifier) (constant_type_arguments)?;
 constant_type_special
@@ -169,68 +169,70 @@ constant_field_access::= identifier DOT label;
 constant_value::= constant_tuple | constant_list | constant_bit_string | constant_record | identifier | constant_field_access | any_literal;
 constant
     ::= (visibility_modifier)? CONST identifier (constant_type_annotation)? EQUAL constant_value
-    ;
+    { pin = 3 };
 
-type_parameters::= LEFT_PAREN <<comma_separated_list type_parameter>>? RIGHT_PAREN;
+type_parameters::= LEFT_PAREN <<comma_separated_list type_parameter>>? RIGHT_PAREN { pin = 1 };
 type_name::= (type_identifier | remote_type_identifier) (type_parameters)?  ;
-external_type::= TYPE type_name;
+external_type::= TYPE type_name { pin = 1 };
 
-function_parameter_types ::= LEFT_PAREN <<comma_separated_list type_base>>? RIGHT_PAREN;
-tuple_type::= HASH LEFT_PAREN <<comma_separated_list type_base>>? RIGHT_PAREN;
-function_type::= FN (function_parameter_types)? R_ARROW type_base;
+function_parameter_types ::= LEFT_PAREN <<comma_separated_list type_base>>? RIGHT_PAREN { pin = 1 };
+tuple_type::= HASH LEFT_PAREN <<comma_separated_list type_base>>? RIGHT_PAREN { pin = 2 };
+function_type_return_type ::= R_ARROW type_base { pin = 1 }
+function_type::= FN (function_parameter_types)? function_type_return_type { pin = 1 };
 
 type_base::= type_rule | type_hole | tuple_type | function_type | type_var;
 type_annotation::= COLON type_base;
 type_argument::= type_base;
-type_arguments::= LEFT_PAREN <<comma_separated_list type_argument>>? RIGHT_PAREN;
+type_arguments::= LEFT_PAREN <<comma_separated_list type_argument>>? RIGHT_PAREN { pin = 1 };
 type_rule::= (type_identifier | remote_type_identifier) (type_arguments)?;
 
 external_function_body::= STRING STRING;
 external_function_parameter::= (identifier COLON)? type_base;
 external_function_parameters::= LEFT_PAREN <<comma_separated_list external_function_parameter>>? RIGHT_PAREN;
-external_function::= FN identifier external_function_parameters R_ARROW type_base EQUAL external_function_body;
+external_function::= FN identifier external_function_parameters R_ARROW type_base EQUAL external_function_body { pin = 'identifier' };
 
 private external_statement ::= (visibility_modifier)? EXTERNAL (external_function | external_type);
 
 function_parameter_args::= labeled_discard_param | discard_param | labeled_name_param | name_param;
 function_parameter::= function_parameter_args (type_annotation)?;
-function_parameters::= LEFT_PAREN <<comma_separated_list function_parameter>>? RIGHT_PAREN;
-function_body::= LEFT_BRACE (expression_seq)? RIGHT_BRACE;
-function::= (visibility_modifier)? FN identifier function_parameters (R_ARROW type_base)? function_body;
+function_parameters::= LEFT_PAREN <<comma_separated_list function_parameter>>? RIGHT_PAREN { pin = 1 }
+function_body::= LEFT_BRACE (expression_seq)? RIGHT_BRACE { pin = 1 };
+function_return_type ::= R_ARROW type_base { pin = 1 }
+function::= (visibility_modifier)? FN identifier function_parameters function_return_type? function_body { pin = 'identifier' }
 
 list_pattern_tail::= DOT_DOT (identifier | discard)?;
-list_pattern::= LEFT_SQUARE <<comma_separated_list pattern>>? (list_pattern_tail)? RIGHT_SQUARE;
+list_pattern::= LEFT_SQUARE <<comma_separated_list pattern>>? (list_pattern_tail)? RIGHT_SQUARE { pin = 1 };
 
 pattern_bit_string_segment::= pattern (COLON bit_string_segment_options)?;
-pattern_bit_string::= LT_LT <<comma_separated_list pattern_bit_string_segment>>? GT_GT;
+pattern_bit_string::= LT_LT <<comma_separated_list pattern_bit_string_segment>>? GT_GT { pin = 1 };
 
-tuple_pattern::= HASH LEFT_PAREN <<comma_separated_list pattern>>? RIGHT_PAREN;
+tuple_pattern::= HASH LEFT_PAREN <<comma_separated_list pattern>>? RIGHT_PAREN { pin = 2 };
 pattern_spread::= (DOT_DOT (COMMA)?);
 record_pattern_argument::= (label COLON)? pattern;
 record_pattern_arguments::= LEFT_PAREN <<comma_separated_list record_pattern_argument>>? (pattern_spread)? RIGHT_PAREN;
 record_pattern_or_identifier::= (constructor_name | (identifier remote_constructor_name_suffix?)) (record_pattern_arguments)?;
 pattern::= (record_pattern_or_identifier | discard | tuple_pattern | pattern_bit_string | list_pattern | any_literal) (AS identifier)?;
 
-try_rule::= TRY pattern (type_annotation)? EQUAL expr;
+try_rule::= TRY pattern (type_annotation)? EQUAL expr { pin = 1 };
 expression_seq::= (expr | try_rule)+;
 
 argument::= (label ':')? (hole | expr);
-arguments::= LEFT_PAREN <<comma_separated_list argument>>? RIGHT_PAREN;
+arguments::= LEFT_PAREN <<comma_separated_list argument>>? RIGHT_PAREN { pin = 1 };
 
 expression_bit_string_segment::= unit_expr (COLON bit_string_segment_options)?;
-expression_bit_string::= LT_LT <<comma_separated_list expression_bit_string_segment>>? GT_GT;
+expression_bit_string::= LT_LT <<comma_separated_list expression_bit_string_segment>>? GT_GT { pin = 1 };
 
 todo_rule::= TODO (LEFT_PAREN STRING RIGHT_PAREN)?;
 panic_rule ::= PANIC;
-tuple::= HASH LEFT_PAREN <<comma_separated_list expr>>? RIGHT_PAREN;
-list::= LEFT_SQUARE (expr ((COMMA expr)*)? (COMMA)? ('..' expr)?)? RIGHT_SQUARE;
+tuple::= HASH LEFT_PAREN <<comma_separated_list expr>>? RIGHT_PAREN { pin = 2 }
+list::= LEFT_SQUARE (<<comma_separated_list expr>> ('..' expr)?)? RIGHT_SQUARE { pin = 1 };
 
 anonymous_function_parameter_args::= discard_param | name_param;
 anonymous_function_parameter::= anonymous_function_parameter_args (type_annotation)?;
 anonymous_function_parameters::= LEFT_PAREN (anonymous_function_parameter (COMMA anonymous_function_parameter)* (COMMA)?)? RIGHT_PAREN;
 anonymous_function::= FN anonymous_function_parameters (R_ARROW type_rule)? function_body;
 
-expression_group::= LEFT_BRACE expression_seq RIGHT_BRACE;
+expression_group::= LEFT_BRACE expression_seq RIGHT_BRACE { pin = 1 };
 
 case_clause_tuple_access::= identifier DOT INTEGER;
 case_clause_guard_unit::= (identifier | case_clause_tuple_access | LEFT_BRACE case_clause_guard_expression RIGHT_BRACE | constant_value) {extends=case_clause_guard_expression};
@@ -246,14 +248,15 @@ case_clause_patterns::= case_clause_pattern (VBAR case_clause_pattern)* (VBAR)?;
 case_clause::= case_clause_patterns (case_clause_guard)? R_ARROW expr;
 case_clauses::= (case_clause)+;
 case_subjects::= expression_seq;
-case_rule::= CASE case_subjects LEFT_BRACE case_clauses RIGHT_BRACE;
+case_body ::= LEFT_BRACE case_clauses RIGHT_BRACE { pin = 1 }
+case_rule::= CASE case_subjects case_body { pin = 1 };
 
 use_args::= identifier | identifier COMMA use_args;
-use_rule::= USE (use_args)? L_ARROW expr;
+use_rule::= USE (use_args)? L_ARROW expr { pin = 1 };
 
 assignment::= pattern (type_annotation)? EQUAL expr;
-let_rule::= LET assignment;
-assert_rule::= ASSERT assignment;
+let_rule::= LET assignment { pin = 1 };
+assert_rule::= ASSERT assignment { pin = 1 };
 negation::= BANG unit_expr;
 
 record_update_argument::= label COLON expr;
@@ -379,12 +382,12 @@ expr
     | plus_minus_expr
 
 data_constructor_argument::= (label COLON)? type_base;
-data_constructor_arguments::= LEFT_PAREN <<comma_separated_list data_constructor_argument>>? RIGHT_PAREN;
+data_constructor_arguments::= LEFT_PAREN <<comma_separated_list data_constructor_argument>>? RIGHT_PAREN { pin = 1 };
 data_constructor::= constructor_name (data_constructor_arguments)?;
 data_constructors::= (data_constructor)+;
 
-type_definition ::= LEFT_BRACE data_constructors RIGHT_BRACE;
-type_alias ::= EQUAL type_rule;
+type_definition ::= LEFT_BRACE data_constructors RIGHT_BRACE { pin = 1 };
+type_alias ::= EQUAL type_rule { pin = 1 };
 private type_statement ::= (visibility_modifier)? (opacity_modifier)? TYPE type_name (type_definition | type_alias);
 
 statement
