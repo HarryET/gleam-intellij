@@ -21,7 +21,7 @@ abstract class GleamElementImpl(type: IElementType): CompositePsiElement(type), 
     override fun toString(): String = "${javaClass.simpleName}($elementType)"
 }
 
-abstract class RsStubbedElementImpl<StubT : StubElement<*>> : StubBasedPsiElementBase<StubT>, GleamElement {
+abstract class GleamStubbedElementImpl<StubT : StubElement<*>> : StubBasedPsiElementBase<StubT>, GleamElement {
     constructor(node: ASTNode) : super(node)
     constructor(stub: StubT, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
     override fun toString(): String = "${javaClass.simpleName}($elementType)"
