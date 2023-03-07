@@ -213,7 +213,7 @@ inline fun <Key: Any, reified Psi : PsiElement> getElements(
     indexKey: StubIndexKey<Key, Psi>,
     key: Key, project: Project,
     scope: GlobalSearchScope?
-): Collection<Psi> =
+): MutableCollection<Psi> =
     StubIndex.getElements(indexKey, key, project, scope, Psi::class.java)
 
 
@@ -423,28 +423,7 @@ val DataContext.elementUnderCaretInEditor: PsiElement?
         return psiFile.findElementAt(editor.caretModel.offset)
     }
 
-fun isFeatureEnabled(featureId: String): Boolean {
-    // Hack to pass values of experimental features in headless IDE run
-    // Should help to configure IDE-based tools like Qodana
-    if (isHeadlessEnvironment) {
-        val value = System.getProperty(featureId)?.toBooleanStrictOrNull()
-        if (value != null) return value
-    }
-
-    return Experiments.getInstance().isFeatureEnabled(featureId)
-}
-
 fun setFeatureEnabled(featureId: String, enabled: Boolean) = Experiments.getInstance().setFeatureEnabled(featureId, enabled)
-
-fun <T> runWithEnabledFeatures(vararg featureIds: String, action: () -> T): T {
-    val currentValues = featureIds.map { it to isFeatureEnabled(it) }
-    featureIds.forEach { setFeatureEnabled(it, true) }
-    return try {
-        action()
-    } finally {
-        currentValues.forEach { (featureId, currentValue) -> setFeatureEnabled(featureId, currentValue) }
-    }
-}
 
 class CachedValueDelegate<T>(provider: () -> CachedValueProvider.Result<T>) {
     private val cachedValue: CachedValue<T> = CachedValueImpl(provider)

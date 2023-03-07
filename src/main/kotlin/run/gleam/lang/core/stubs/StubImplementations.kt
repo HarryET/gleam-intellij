@@ -1,16 +1,13 @@
 package run.gleam.lang.core.stubs
 
 import com.intellij.psi.PsiElement
-import com.intellij.psi.stubs.IStubElementType
-import com.intellij.psi.stubs.PsiFileStubImpl
-import com.intellij.psi.stubs.StubBase
-import com.intellij.psi.stubs.StubElement
+import com.intellij.psi.stubs.*
 import com.intellij.psi.tree.IStubFileElementType
 import run.gleam.lang.GleamLanguage
 import run.gleam.lang.core.parser.GleamParserDefinition
-import run.gleam.lang.core.psi.GleamExternalFunction
 import run.gleam.lang.core.psi.GleamFile
 import run.gleam.lang.core.psi.GleamFunction
+import run.gleam.lang.core.psi.impl.GleamFunctionImpl
 
 class GleamFileStub(
     file: GleamFile?,
@@ -25,29 +22,36 @@ class GleamFileStub(
     }
 }
 
-//fun factory(name: String): GleamStubElementType<*, *> = when (name) {
-//    else -> error("Unknown element $name")
-//}
-
-abstract class GleamFlagOwnerStubBase<T: PsiElement>(
-    parent: StubElement<*>?,
-    elementType: IStubElementType<*, *>
-) : StubBase<T>(parent, elementType) {
-    protected abstract val flags: Int
+fun factory(name: String): GleamStubElementType<*, *> = when (name) {
+    "FUNCTION" -> GleamFunctionStub.Type
+    else -> error("Unknown element $name")
 }
 
 class GleamFunctionStub(
     parent: StubElement<*>?, elementType: IStubElementType<*, *>,
-    override val name: String?,
-    override val flags: Int
-) : GleamNamedStub, GleamFlagOwnerStubBase<GleamFunction>(parent, elementType) {
+    override val name: String?
+) : GleamNamedStub, GleamElementStub<GleamFunction>(parent, elementType) {
+    object Type: GleamStubElementType<GleamFunctionStub, GleamFunction>("FUNCTION") {
+        override fun serialize(stub: GleamFunctionStub, dataStream: StubOutputStream) =
+            with(dataStream) {
+                writeName(stub.name)
+            }
 
-}
+        override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): GleamFunctionStub =
+            GleamFunctionStub(
+                parentStub,
+                this,
+                dataStream.readName()?.string,
+            )
 
-class GleamExternalFunctionStub(
-    parent: StubElement<*>?, elementType: IStubElementType<*, *>,
-    override val name: String?,
-    override val flags: Int
-) : GleamNamedStub, GleamFlagOwnerStubBase<GleamExternalFunction>(parent, elementType) {
+        override fun createStub(psi: GleamFunction, parentStub: StubElement<out PsiElement>?): GleamFunctionStub =
+            GleamFunctionStub(
+                parentStub,
+                this,
+                psi.identifier.text
+            )
 
+        override fun createPsi(stub: GleamFunctionStub): GleamFunction = GleamFunctionImpl(stub, this)
+
+    }
 }

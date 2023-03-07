@@ -20,9 +20,6 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.NlsContexts.DialogTitle
 import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.components.JBTextField
-import com.intellij.ui.dsl.builder.Cell
-import com.intellij.ui.dsl.builder.Row
-import com.intellij.ui.dsl.gridLayout.HorizontalAlign
 import com.intellij.util.Alarm
 import run.gleam.lang.GleamFileType
 import run.gleam.lang.core.psi.ext.GleamElement
@@ -112,11 +109,6 @@ fun selectElement(element: GleamElement, editor: Editor) {
     editor.caretModel.moveToOffset(start)
     editor.scrollingModel.scrollToCaret(ScrollType.RELATIVE)
     editor.selectionModel.setSelection(start, element.textRange.endOffset)
-}
-
-fun <T : JComponent> Row.fullWidthCell(component: T): Cell<T> {
-    return cell(component)
-        .horizontalAlign(HorizontalAlign.FILL)
 }
 
 val JBTextField.trimmedText: String
