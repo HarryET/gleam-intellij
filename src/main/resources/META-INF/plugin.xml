@@ -17,11 +17,18 @@
                   extensions="gleam"
                   fieldName="INSTANCE"/>
 
+        <!-- Parser -->
         <lang.parserDefinition language="Gleam" implementationClass="run.gleam.lang.core.parser.GleamParserDefinition"/>
+        <stubElementTypeHolder class="run.gleam.lang.core.psi.GleamTypes"/>
 
+        <!-- Syntax Highlighter -->
         <lang.syntaxHighlighter language="Gleam"
                                 implementationClass="run.gleam.ide.highlight.GleamHighlighter"/>
 
+        <!-- Colour Settings -->
         <colorSettingsPage implementation="run.gleam.ide.colors.GleamColorSettingsPage"/>
+
+        <!-- Indices -->
+        <stubIndex implementation="run.gleam.lang.core.stubs.index.GleamNamedElementIndex"/>
     </extensions>
 </idea-plugin>

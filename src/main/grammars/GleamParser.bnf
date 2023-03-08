@@ -204,7 +204,11 @@ function::= (visibility_modifier)? FN identifier function_parameters function_re
 {
     pin = 'identifier'
     name = ""
-    extends = "run.gleam.lang.core.psi.ext.GleamStubbedElementImpl<?>"
+    implements = [
+        "run.gleam.lang.core.psi.ext.GleamNamedElement"
+        "run.gleam.lang.core.psi.ext.GleamNameIdentifierOwner"
+    ]
+    extends = "run.gleam.lang.core.psi.ext.GleamStubbedNamedElementImpl<?>"
     stubClass = "run.gleam.lang.core.stubs.GleamFunctionStub"
     elementTypeFactory = "run.gleam.lang.core.stubs.StubImplementationsKt.factory"
 }

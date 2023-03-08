@@ -18,7 +18,7 @@ class GleamFileStub(
         private const val STUB_VERSION = 1
         override fun getStubVersion(): Int = GleamParserDefinition.PARSER_VERSION + STUB_VERSION
 
-        override fun getExternalId(): String = "Gleam.file"
+        override fun getExternalId(): String = "gleam.file"
     }
 }
 
@@ -52,6 +52,8 @@ class GleamFunctionStub(
             )
 
         override fun createPsi(stub: GleamFunctionStub): GleamFunction = GleamFunctionImpl(stub, this)
+
+        override fun indexStub(stub: GleamFunctionStub, sink: IndexSink) = sink.indexFunction(stub)
 
     }
 }
