@@ -199,7 +199,13 @@ function_parameter_args::= labeled_discard_param | discard_param | labeled_name_
 function_parameter::= function_parameter_args (type_annotation)?;
 function_parameters::= LEFT_PAREN <<comma_separated_list function_parameter>>? RIGHT_PAREN { pin = 1 }
 function_body::= LEFT_BRACE (expression_seq)? RIGHT_BRACE { pin = 1 };
-function_return_type ::= R_ARROW type_base { pin = 1 }
+function_return_type ::= R_ARROW type_base
+{
+    pin = 1
+    extends = "run.gleam.lang.core.psi.ext.GleamStubbedElementImpl<?>"
+    stubClass = "run.gleam.lang.core.stubs.GleamPlaceholderStub<?>"
+    elementTypeFactory = "run.gleam.lang.core.stubs.StubImplementationsKt.factory"
+}
 function::= (visibility_modifier)? FN identifier function_parameters function_return_type? function_body
 {
     pin = 'identifier'

@@ -8,6 +8,7 @@ import run.gleam.lang.core.parser.GleamParserDefinition
 import run.gleam.lang.core.psi.GleamFile
 import run.gleam.lang.core.psi.GleamFunction
 import run.gleam.lang.core.psi.impl.GleamFunctionImpl
+import run.gleam.lang.core.psi.impl.GleamFunctionReturnTypeImpl
 
 class GleamFileStub(
     file: GleamFile?,
@@ -24,6 +25,7 @@ class GleamFileStub(
 
 fun factory(name: String): GleamStubElementType<*, *> = when (name) {
     "FUNCTION" -> GleamFunctionStub.Type
+    "FUNCTION_RETURN_TYPE" -> GleamPlaceholderStub.Type("FUNCTION_RETURN_TYPE", ::GleamFunctionReturnTypeImpl)
     else -> error("Unknown element $name")
 }
 
