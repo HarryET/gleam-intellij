@@ -173,7 +173,7 @@ constant
     ::= (visibility_modifier)? CONST identifier (constant_type_annotation)? EQUAL constant_value
     { pin = 3 };
 
-type_parameters::= LEFT_PAREN <<comma_separated_list type_parameter>>? RIGHT_PAREN { pin = 1 };
+type_parameters::= LEFT_PAREN <<comma_separated_list type_param>>? RIGHT_PAREN { pin = 1 };
 type_name::= (type_identifier | remote_type_identifier) (type_parameters)?  ;
 external_type::= TYPE type_name { pin = 1 };
 
@@ -248,7 +248,7 @@ list::= LEFT_SQUARE (<<comma_separated_list expr>> ('..' expr)?)? RIGHT_SQUARE {
 
 anonymous_function_parameter_args::= discard_param | name_param;
 anonymous_function_parameter::= anonymous_function_parameter_args (type_annotation)?;
-anonymous_function_parameters::= LEFT_PAREN (anonymous_function_parameter (COMMA anonymous_function_parameter)* (COMMA)?)? RIGHT_PAREN;
+anonymous_function_parameters::= LEFT_PAREN (<<comma_separated_list anonymous_function_parameter>>)? RIGHT_PAREN;
 anonymous_function::= FN anonymous_function_parameters (R_ARROW type_rule)? function_body;
 
 expression_group::= LEFT_BRACE expression_seq RIGHT_BRACE;
@@ -423,7 +423,7 @@ constructor_name::= UP_NAME;
 type_identifier::= UP_NAME;
 discard::= DISCARD_NAME;
 label::= DOWN_NAME;
-type_parameter::= DOWN_NAME;
+type_param::= DOWN_NAME;
 type_var::= DOWN_NAME;
 type_hole::= DOWN_NAME;
 hole::= DISCARD_NAME;
