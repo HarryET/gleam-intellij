@@ -169,9 +169,17 @@ constant_type_special
 constant_type_annotation::= COLON constant_type;
 constant_field_access::= identifier DOT label;
 constant_value::= constant_tuple | constant_list | constant_bit_string | constant_record | identifier | constant_field_access | any_literal;
-constant
-    ::= (visibility_modifier)? CONST identifier (constant_type_annotation)? EQUAL constant_value
-    { pin = 3 };
+constant ::= (visibility_modifier)? CONST identifier (constant_type_annotation)? EQUAL constant_value
+{
+    pin = 3
+    implements = [
+        "run.gleam.lang.core.psi.ext.GleamNamedElement"
+        "run.gleam.lang.core.psi.ext.GleamNameIdentifierOwner"
+    ]
+    extends = "run.gleam.lang.core.psi.ext.GleamStubbedNamedElementImpl<?>"
+    stubClass = "run.gleam.lang.core.stubs.GleamConstantStub"
+    elementTypeFactory = "run.gleam.lang.core.stubs.StubImplementationsKt.factory"
+};
 
 type_parameters::= LEFT_PAREN <<comma_separated_list type_param>>? RIGHT_PAREN { pin = 1 };
 type_name::= (type_identifier | remote_type_identifier) (type_parameters)?  ;

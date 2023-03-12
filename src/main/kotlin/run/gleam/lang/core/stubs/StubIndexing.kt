@@ -7,6 +7,10 @@ fun IndexSink.indexFunction(stub: GleamFunctionStub) {
     indexNamedStub(stub)
 }
 
+fun IndexSink.indexConstant(stub: GleamConstantStub) {
+    indexNamedStub(stub)
+}
+
 private fun IndexSink.indexNamedStub(stub: GleamNamedStub) {
     stub.name?.let {
         occurrence(GleamNamedElementIndex.KEY, it)

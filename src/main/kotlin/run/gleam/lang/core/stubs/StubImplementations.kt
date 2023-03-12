@@ -6,8 +6,10 @@ import com.intellij.psi.tree.IStubFileElementType
 import com.intellij.util.io.DataInputOutputUtil
 import run.gleam.lang.GleamLanguage
 import run.gleam.lang.core.parser.GleamParserDefinition
+import run.gleam.lang.core.psi.GleamConstant
 import run.gleam.lang.core.psi.GleamFile
 import run.gleam.lang.core.psi.GleamFunction
+import run.gleam.lang.core.psi.impl.GleamConstantImpl
 import run.gleam.lang.core.psi.impl.GleamFunctionImpl
 import run.gleam.lang.core.psi.impl.GleamFunctionReturnTypeImpl
 
@@ -27,6 +29,7 @@ class GleamFileStub(
 fun factory(name: String): GleamStubElementType<*, *> = when (name) {
     "FUNCTION" -> GleamFunctionStub.Type
     "FUNCTION_RETURN_TYPE" -> GleamPlaceholderStub.Type("FUNCTION_RETURN_TYPE", ::GleamFunctionReturnTypeImpl)
+    "CONSTANT" -> GleamConstantStub.Type
     else -> error("Unknown element $name")
 }
 
@@ -58,6 +61,33 @@ class GleamFunctionStub(
 
         override fun indexStub(stub: GleamFunctionStub, sink: IndexSink) = sink.indexFunction(stub)
 
+    }
+}
+
+class GleamConstantStub(
+    parent: StubElement<*>?, elementType: IStubElementType<*, *>,
+    override val name: String?,
+) : GleamNamedStub, GleamElementStub<GleamConstant>(parent, elementType) {
+    object Type : GleamStubElementType<GleamConstantStub, GleamConstant>("CONSTANT") {
+        override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
+            GleamConstantStub(
+                parentStub,
+                this,
+                dataStream.readNameAsString()
+            )
+
+        override fun serialize(stub: GleamConstantStub, dataStream: StubOutputStream) =
+            with(dataStream) {
+                writeName(stub.name)
+            }
+
+        override fun createPsi(stub: GleamConstantStub) =
+            GleamConstantImpl(stub, this)
+
+        override fun createStub(psi: GleamConstant, parentStub: StubElement<*>?): GleamConstantStub =
+            GleamConstantStub(parentStub, this, psi.name)
+
+        override fun indexStub(stub: GleamConstantStub, sink: IndexSink) = sink.indexConstant(stub)
     }
 }
 
