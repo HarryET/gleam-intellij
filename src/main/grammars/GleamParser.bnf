@@ -202,7 +202,7 @@ external_function_parameter::= (identifier COLON)? type_base;
 external_function_parameters::= LEFT_PAREN <<comma_separated_list external_function_parameter>>? RIGHT_PAREN;
 external_function::= FN identifier external_function_parameters R_ARROW type_base EQUAL external_function_body { pin = 'identifier' };
 
-private external_statement ::= (visibility_modifier)? EXTERNAL (external_function | external_type);
+external_statement ::= (visibility_modifier)? EXTERNAL (external_function | external_type);
 
 function_parameter_args::= labeled_discard_param | discard_param | labeled_name_param | name_param;
 function_parameter::= function_parameter_args (type_annotation)?;
@@ -416,7 +416,7 @@ data_constructors::= (data_constructor)+;
 
 type_definition ::= LEFT_BRACE data_constructors RIGHT_BRACE { pin = 1 };
 type_alias ::= EQUAL type_rule { pin = 1 };
-private type_statement ::= (visibility_modifier)? (opacity_modifier)? TYPE type_name (type_definition | type_alias);
+type_statement ::= (visibility_modifier)? (opacity_modifier)? TYPE type_name (type_definition | type_alias);
 
 statement
     ::= imports
