@@ -57,3 +57,28 @@ abstract class GleamStubbedNamedElementImpl<StubT> : GleamStubbedElementImpl<Stu
 
     override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: super.getTextOffset()
 }
+
+
+abstract class GleamStubbedNamedVisibilityElementImpl<StubT> : GleamStubbedElementImpl<StubT>, GleamVisibilityOwner,
+    GleamNameIdentifierOwner
+        where StubT : GleamNamedStub, StubT : StubElement<*> {
+
+    constructor(node: ASTNode) : super(node)
+
+    constructor(stub: StubT, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+
+    override fun getNameIdentifier(): PsiElement? = findChildByType(IDENTIFIER)
+
+    override fun getName(): String? {
+        val stub = greenStub
+//        return if (stub !== null) stub.name else nameIdentifier?.unescapedText
+        return if (stub !== null) stub.name else nameIdentifier?.text
+    }
+
+    override fun setName(name: String): PsiElement? {
+//        nameIdentifier?.replace(RsPsiFactory(project).createIdentifier(name))
+        return this
+    }
+
+    override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: super.getTextOffset()
+}

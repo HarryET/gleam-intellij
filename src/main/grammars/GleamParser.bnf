@@ -171,12 +171,13 @@ constant_field_access::= identifier DOT label;
 constant_value::= constant_tuple | constant_list | constant_bit_string | constant_record | identifier | constant_field_access | any_literal;
 constant ::= (visibility_modifier)? CONST identifier (constant_type_annotation)? EQUAL constant_value
 {
-    pin = 3
+    pin = "identifier"
     implements = [
         "run.gleam.lang.core.psi.ext.GleamNamedElement"
         "run.gleam.lang.core.psi.ext.GleamNameIdentifierOwner"
+        "run.gleam.lang.core.psi.ext.GleamVisibilityOwner"
     ]
-    extends = "run.gleam.lang.core.psi.ext.GleamStubbedNamedElementImpl<?>"
+    extends = "run.gleam.lang.core.psi.ext.GleamStubbedNamedVisibilityElementImpl<?>"
     stubClass = "run.gleam.lang.core.stubs.GleamConstantStub"
     elementTypeFactory = "run.gleam.lang.core.stubs.StubImplementationsKt.factory"
 };
@@ -217,12 +218,12 @@ function_return_type ::= R_ARROW type_base
 function::= (visibility_modifier)? FN identifier function_parameters function_return_type? function_body
 {
     pin = 'identifier'
-    name = ""
     implements = [
         "run.gleam.lang.core.psi.ext.GleamNamedElement"
         "run.gleam.lang.core.psi.ext.GleamNameIdentifierOwner"
+        "run.gleam.lang.core.psi.ext.GleamVisibilityOwner"
     ]
-    extends = "run.gleam.lang.core.psi.ext.GleamStubbedNamedElementImpl<?>"
+    extends = "run.gleam.lang.core.psi.ext.GleamStubbedNamedVisibilityElementImpl<?>"
     stubClass = "run.gleam.lang.core.stubs.GleamFunctionStub"
     elementTypeFactory = "run.gleam.lang.core.stubs.StubImplementationsKt.factory"
 }
@@ -425,6 +426,13 @@ statement
     | function
     ;
 
+visibility_modifier::= PUB {
+    extends = "run.gleam.lang.core.psi.ext.GleamStubbedElementImpl<?>"
+    stubClass = "run.gleam.lang.core.stubs.GleamVisStub"
+    elementTypeFactory = "run.gleam.lang.core.stubs.StubImplementationsKt.factory"
+};
+opacity_modifier::= OPAQUE_KW;
+
 ///// Aliases (maybe not needed by why not have them for now and we can delete later
 identifier::= DOWN_NAME;
 constructor_name::= UP_NAME;
@@ -442,8 +450,6 @@ labeled_discard_param::= label discard;
 remote_constructor_name::= identifier DOT constructor_name;
 remote_constructor_name_suffix::= DOT constructor_name;
 remote_type_identifier::= identifier DOT type_identifier;
-visibility_modifier::= PUB;
-opacity_modifier::= OPAQUE_KW;
 
 //// UTILS
 // Trailing commas are allowed
