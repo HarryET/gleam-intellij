@@ -11,6 +11,14 @@ fun IndexSink.indexConstant(stub: GleamConstantStub) {
     indexNamedStub(stub)
 }
 
+fun IndexSink.indexTypeAlias(stub: GleamTypeAliasStub) {
+    indexNamedStub(stub)
+}
+
+fun IndexSink.indexTypeDef(stub: GleamTypeDefStub) {
+    indexNamedStub(stub)
+}
+
 private fun IndexSink.indexNamedStub(stub: GleamNamedStub) {
     stub.name?.let {
         occurrence(GleamNamedElementIndex.KEY, it)
