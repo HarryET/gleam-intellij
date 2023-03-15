@@ -202,7 +202,7 @@ external_function_parameter::= (identifier COLON)? type_base;
 external_function_parameters::= LEFT_PAREN <<comma_separated_list external_function_parameter>>? RIGHT_PAREN;
 external_function::= FN identifier external_function_parameters R_ARROW type_base EQUAL external_function_body { pin = 'identifier' };
 
-external_statement ::= (visibility_modifier)? EXTERNAL (external_function | external_type);
+external_statement ::= (visibility_modifier)? EXTERNAL (external_function | external_type) { pin = "EXTERNAL" };
 
 function_parameter_args::= labeled_discard_param | discard_param | labeled_name_param | name_param;
 function_parameter::= function_parameter_args (type_annotation)?;
@@ -414,9 +414,11 @@ data_constructor_arguments::= LEFT_PAREN <<comma_separated_list data_constructor
 data_constructor::= constructor_name (data_constructor_arguments)?;
 data_constructors::= (data_constructor)+;
 
-type_definition ::= LEFT_BRACE data_constructors RIGHT_BRACE { pin = 1 };
-type_alias ::= EQUAL type_rule { pin = 1 };
-type_statement ::= (visibility_modifier)? (opacity_modifier)? TYPE type_name (type_definition | type_alias);
+upper type_definition ::= LEFT_BRACE data_constructors RIGHT_BRACE { pin = 1 };
+upper type_alias ::= EQUAL type_rule { pin = 1 };
+type_statement ::= (visibility_modifier)? (opacity_modifier)? TYPE type_name (type_definition | type_alias) {
+    elementType = ToBeUpped
+}
 
 statement
     ::= imports
@@ -454,3 +456,9 @@ remote_type_identifier::= identifier DOT type_identifier;
 //// UTILS
 // Trailing commas are allowed
 private meta comma_separated_list ::= <<param>> ( COMMA <<param>> )* COMMA?
+
+// Use as an `elementType` for always upped rules like `Rule ::= FOO BAR ( upper1 | upper2 )`
+// (without an `elementType` upper rules won't work, GK can change element type of the frame
+// only if it already has some type)
+// https://github.com/JetBrains/Grammar-Kit/blob/d716ade658/src/org/intellij/grammar/parser/GeneratedParserUtilBase.java#L656
+fake ToBeUpped ::=
