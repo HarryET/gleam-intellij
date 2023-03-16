@@ -422,6 +422,7 @@ upper type_definition ::= LEFT_BRACE data_constructors RIGHT_BRACE {
         "run.gleam.lang.core.psi.ext.GleamVisibilityOwner"
     ]
     extends = "run.gleam.lang.core.psi.ext.GleamStubbedNamedVisibilityElementImpl<?>"
+    mixin = "run.gleam.lang.core.psi.ext.GleamTypeDefinitionImplMixIn"
     stubClass = "run.gleam.lang.core.stubs.GleamTypeDefStub"
     elementTypeFactory = "run.gleam.lang.core.stubs.StubImplementationsKt.factory"
 };
@@ -433,6 +434,7 @@ upper type_alias ::= EQUAL type_rule {
          "run.gleam.lang.core.psi.ext.GleamVisibilityOwner"
      ]
      extends = "run.gleam.lang.core.psi.ext.GleamStubbedNamedVisibilityElementImpl<?>"
+     mixin = "run.gleam.lang.core.psi.ext.GleamTypeAliasImplMixIn"
      stubClass = "run.gleam.lang.core.stubs.GleamTypeAliasStub"
      elementTypeFactory = "run.gleam.lang.core.stubs.StubImplementationsKt.factory"
 };
