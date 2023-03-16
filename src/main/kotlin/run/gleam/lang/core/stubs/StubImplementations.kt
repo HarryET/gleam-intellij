@@ -3,6 +3,7 @@ package run.gleam.lang.core.stubs
 import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.*
 import com.intellij.psi.tree.IStubFileElementType
+import com.intellij.util.BitUtil
 import com.intellij.util.io.DataInputOutputUtil
 import run.gleam.lang.GleamLanguage
 import run.gleam.lang.core.parser.GleamParserDefinition
@@ -13,14 +14,15 @@ import run.gleam.lang.core.psi.GleamTypeAlias
 import run.gleam.lang.core.psi.GleamTypeDefinition
 import run.gleam.lang.core.psi.GleamVisibilityModifier
 import run.gleam.lang.core.psi.ext.GleamVisStubKind
+import run.gleam.lang.core.psi.ext.isOpaque
 import run.gleam.lang.core.psi.ext.stubKind
 import run.gleam.lang.core.psi.impl.*
+import run.gleam.stdext.BitFlagsBuilder
 import run.gleam.stdext.readEnum
 import run.gleam.stdext.writeEnum
 
 class GleamFileStub(
     file: GleamFile?,
-    private val flags: Int
 ) : PsiFileStubImpl<GleamFile>(file) {
     object Type : IStubFileElementType<GleamFileStub>(GleamLanguage) {
         // Bump this number if Stub structure changes
@@ -101,12 +103,17 @@ class GleamConstantStub(
 
 class GleamTypeDefStub(
     parent: StubElement<*>?, elementType: IStubElementType<*, *>,
-    override val name: String?
-) : GleamNamedStub, GleamElementStub<GleamTypeDefinition>(parent, elementType) {
+    override val name: String?,
+    override val flags: Int
+) : GleamNamedStub, GleamFlagElementStub<GleamTypeDefinition>(parent, elementType) {
+
+    val isOpaque: Boolean get() = BitUtil.isSet(flags, OPAQUE_MASK)
+
     object Type: GleamStubElementType<GleamTypeDefStub, GleamTypeDefinition>("TYPE_DEFINITION") {
         override fun serialize(stub: GleamTypeDefStub, dataStream: StubOutputStream) =
             with(dataStream) {
                 writeName(stub.name)
+                writeInt(stub.flags)
             }
 
         override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): GleamTypeDefStub =
@@ -114,30 +121,45 @@ class GleamTypeDefStub(
                 parentStub,
                 this,
                 dataStream.readName()?.string,
+                dataStream.readInt()
             )
 
-        override fun createStub(psi: GleamTypeDefinition, parentStub: StubElement<out PsiElement>?): GleamTypeDefStub =
-            GleamTypeDefStub(
+        override fun createStub(psi: GleamTypeDefinition, parentStub: StubElement<out PsiElement>?): GleamTypeDefStub {
+            var flags = 0
+            flags = BitUtil.set(flags, OPAQUE_MASK, psi.isOpaque)
+
+            return GleamTypeDefStub(
                 parentStub,
                 this,
-                psi.name
+                psi.name,
+                flags = flags
             )
+        }
 
         override fun createPsi(stub: GleamTypeDefStub): GleamTypeDefinition = GleamTypeDefinitionImpl(stub, this)
 
         override fun indexStub(stub: GleamTypeDefStub, sink: IndexSink) = sink.indexTypeDef(stub)
 
     }
+
+    companion object : BitFlagsBuilder(Limit.INT) {
+        private val OPAQUE_MASK: Int = nextBitMask()
+    }
 }
 
 class GleamTypeAliasStub(
     parent: StubElement<*>?, elementType: IStubElementType<*, *>,
-    override val name: String?
-) : GleamNamedStub, GleamElementStub<GleamTypeDefinition>(parent, elementType) {
+    override val name: String?,
+    override val flags: Int
+) : GleamNamedStub, GleamFlagElementStub<GleamTypeDefinition>(parent, elementType) {
+
+    val isOpaque: Boolean get() = BitUtil.isSet(flags, OPAQUE_MASK)
+
     object Type: GleamStubElementType<GleamTypeAliasStub, GleamTypeAlias>("TYPE_ALIAS") {
         override fun serialize(stub: GleamTypeAliasStub, dataStream: StubOutputStream) =
             with(dataStream) {
                 writeName(stub.name)
+                writeInt(stub.flags)
             }
 
         override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): GleamTypeAliasStub =
@@ -145,19 +167,29 @@ class GleamTypeAliasStub(
                 parentStub,
                 this,
                 dataStream.readName()?.string,
+                dataStream.readInt()
             )
 
-        override fun createStub(psi: GleamTypeAlias, parentStub: StubElement<out PsiElement>?): GleamTypeAliasStub =
-            GleamTypeAliasStub(
+        override fun createStub(psi: GleamTypeAlias, parentStub: StubElement<out PsiElement>?): GleamTypeAliasStub {
+            var flags = 0
+            flags = BitUtil.set(flags, OPAQUE_MASK, psi.isOpaque)
+
+            return GleamTypeAliasStub(
                 parentStub,
                 this,
-                psi.name
+                psi.name,
+                flags = flags
             )
+        }
 
         override fun createPsi(stub: GleamTypeAliasStub): GleamTypeAlias = GleamTypeAliasImpl(stub, this)
 
         override fun indexStub(stub: GleamTypeAliasStub, sink: IndexSink) = sink.indexTypeAlias(stub)
 
+    }
+
+    companion object : BitFlagsBuilder(Limit.INT) {
+        private val OPAQUE_MASK: Int = nextBitMask()
     }
 }
 

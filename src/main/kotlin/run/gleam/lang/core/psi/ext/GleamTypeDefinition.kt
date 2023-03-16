@@ -4,6 +4,7 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.IStubElementType
 import run.gleam.lang.core.psi.GleamTypeDefinition
+import run.gleam.lang.core.psi.GleamTypes
 import run.gleam.lang.core.psi.GleamTypes.TYPE_NAME
 import run.gleam.lang.core.stubs.GleamTypeDefStub
 
@@ -17,3 +18,6 @@ abstract class GleamTypeDefinitionImplMixIn : GleamStubbedNamedVisibilityElement
         return findChildByType(TYPE_NAME) ?: super.getNameIdentifier()
     }
 }
+
+val GleamTypeDefinition.isOpaque: Boolean
+    get() = greenStub?.isOpaque ?: (node.findChildByType(GleamTypes.OPACITY_MODIFIER) != null)

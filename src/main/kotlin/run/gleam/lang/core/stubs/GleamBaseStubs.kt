@@ -8,9 +8,9 @@ abstract class GleamElementStub<PsiT : PsiElement>(
     parent: StubElement<*>?, elementType: IStubElementType<out StubElement<*>, *>?
 ) : StubBase<PsiT>(parent, elementType)
 
-abstract class GleamFlagOwnerStubBase<T: PsiElement>(
+abstract class GleamFlagElementStub<T: PsiElement>(
     parent: StubElement<*>?,
-    elementType: IStubElementType<*, *>
+    elementType: IStubElementType<*, *>?
 ) : StubBase<T>(parent, elementType) {
     protected abstract val flags: Int
 }
