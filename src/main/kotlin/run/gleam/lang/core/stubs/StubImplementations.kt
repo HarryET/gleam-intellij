@@ -99,7 +99,6 @@ class GleamConstantStub(
     }
 }
 
-// todo: These need to override getNameIdentifier because their name comes from chile type_name not identifier directly
 class GleamTypeDefStub(
     parent: StubElement<*>?, elementType: IStubElementType<*, *>,
     override val name: String?

@@ -13,6 +13,7 @@ abstract class GleamTypeAliasImplMixIn : GleamStubbedNamedVisibilityElementImpl<
     constructor(stub: GleamTypeAliasStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
     override fun getNameIdentifier(): PsiElement? {
+        // todo: TYPE_NAME is not accurate, because it can be Thing(foo), need to make this more accurate to only select Thing
         return findChildByType(TYPE_NAME) ?: super.getNameIdentifier()
     }
 }
