@@ -30,5 +30,8 @@
 
         <!-- Indices -->
         <stubIndex implementation="run.gleam.lang.core.stubs.index.GleamNamedElementIndex"/>
+
+        <!-- Navigation -->
+        <gotoSymbolContributor implementation="run.gleam.ide.navigation.GleamSymbolNavigationContributor"/>
     </extensions>
 </idea-plugin>
