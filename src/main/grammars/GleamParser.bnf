@@ -199,7 +199,7 @@ type_rule::= (type_identifier | remote_type_identifier) (type_arguments)?;
 external_function_body::= STRING STRING;
 external_function_parameter::= (identifier COLON)? type_base;
 external_function_parameters::= LEFT_PAREN <<comma_separated_list external_function_parameter>>? RIGHT_PAREN;
-external_function::= FN identifier external_function_parameters R_ARROW type_base EQUAL external_function_body { pin = 'identifier' };
+external_function::= FN identifier external_function_parameters function_return_type EQUAL external_function_body { pin = 'identifier' };
 
 external_statement ::= (visibility_modifier)? EXTERNAL (external_function | external_type) { pin = "EXTERNAL" };
 
