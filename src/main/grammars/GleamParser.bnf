@@ -188,8 +188,7 @@ external_type::= TYPE type_name { pin = 1 };
 
 function_parameter_types ::= LEFT_PAREN <<comma_separated_list type_base>>? RIGHT_PAREN { pin = 1 };
 tuple_type::= HASH LEFT_PAREN <<comma_separated_list type_base>>? RIGHT_PAREN { pin = 2 };
-function_type_return_type ::= R_ARROW type_base { pin = 1 }
-function_type::= FN (function_parameter_types)? function_type_return_type { pin = 1 };
+function_type::= FN (function_parameter_types)? function_return_type { pin = 1 };
 
 type_base::= type_rule | type_hole | tuple_type | function_type | type_var;
 type_annotation::= COLON type_base;
