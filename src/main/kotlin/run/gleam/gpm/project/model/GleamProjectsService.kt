@@ -27,6 +27,7 @@ interface GleamProjectsService {
      */
     fun attachGleamProject(manifest: Path): Boolean
     fun attachGleamProjects(vararg manifests: Path)
+    fun detachGleamProject(gleamProject: GleamProject)
     fun refreshAllProjects(): CompletableFuture<out List<GleamProject>>
     fun discoverAndRefresh(): CompletableFuture<out List<GleamProject>>
     fun suggestManifests(): Sequence<VirtualFile>
@@ -44,7 +45,7 @@ interface GleamProjectsService {
     }
 
     fun interface GleamProjectsListener {
-        fun cargoProjectsUpdated(service: GleamProjectsService, projects: Collection<GleamProject>)
+        fun gleamProjectsUpdated(service: GleamProjectsService, projects: Collection<GleamProject>)
     }
 
     interface GleamProjectsRefreshListener {
