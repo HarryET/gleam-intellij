@@ -63,66 +63,66 @@ abstract class GleamToolchainBase(val location: Path) {
 
     override fun hashCode(): Int = location.hashCode()
 
-    fun createGeneralCommandLine(
-        executable: Path,
-        workingDirectory: Path,
-        redirectInputFrom: File?,
-        backtraceMode: BacktraceMode,
-        environmentVariables: EnvironmentVariablesData,
-        parameters: List<String>,
-        emulateTerminal: Boolean,
-        withSudo: Boolean,
-        patchToRemote: Boolean = true,
-        http: HttpConfigurable = HttpConfigurable.getInstance()
-    ): GeneralCommandLine {
-        var commandLine = GeneralCommandLine(executable, withSudo)
-            .withWorkDirectory(workingDirectory)
-            .withInput(redirectInputFrom)
-            .withEnvironment("TERM", "ansi")
-            .withParameters(parameters)
-            .withCharset(Charsets.UTF_8)
-            .withRedirectErrorStream(true)
-        withProxyIfNeeded(commandLine, http)
+//    fun createGeneralCommandLine(
+//        executable: Path,
+//        workingDirectory: Path,
+//        redirectInputFrom: File?,
+//        backtraceMode: BacktraceMode,
+//        environmentVariables: EnvironmentVariablesData,
+//        parameters: List<String>,
+//        emulateTerminal: Boolean,
+//        withSudo: Boolean,
+//        patchToRemote: Boolean = true,
+//        http: HttpConfigurable = HttpConfigurable.getInstance()
+//    ): GeneralCommandLine {
+//        var commandLine = GeneralCommandLine(executable, withSudo)
+//            .withWorkDirectory(workingDirectory)
+//            .withInput(redirectInputFrom)
+//            .withEnvironment("TERM", "ansi")
+//            .withParameters(parameters)
+//            .withCharset(Charsets.UTF_8)
+//            .withRedirectErrorStream(true)
+//        withProxyIfNeeded(commandLine, http)
+//
+//        when (backtraceMode) {
+//            BacktraceMode.SHORT -> commandLine.withEnvironment(CargoConstants.RUST_BACKTRACE_ENV_VAR, "short")
+//            BacktraceMode.FULL -> commandLine.withEnvironment(CargoConstants.RUST_BACKTRACE_ENV_VAR, "full")
+//            BacktraceMode.NO -> Unit
+//        }
+//
+//        environmentVariables.configureCommandLine(commandLine, true)
+//
+//        if (emulateTerminal) {
+//            commandLine = PtyCommandLine(commandLine)
+//                .withInitialColumns(PtyCommandLine.MAX_COLUMNS)
+//                .withConsoleMode(false)
+//        }
+//
+//        if (patchToRemote) {
+//            commandLine = patchCommandLine(commandLine)
+//        }
+//
+//        return commandLine
+//    }
 
-        when (backtraceMode) {
-            BacktraceMode.SHORT -> commandLine.withEnvironment(CargoConstants.RUST_BACKTRACE_ENV_VAR, "short")
-            BacktraceMode.FULL -> commandLine.withEnvironment(CargoConstants.RUST_BACKTRACE_ENV_VAR, "full")
-            BacktraceMode.NO -> Unit
-        }
-
-        environmentVariables.configureCommandLine(commandLine, true)
-
-        if (emulateTerminal) {
-            commandLine = PtyCommandLine(commandLine)
-                .withInitialColumns(PtyCommandLine.MAX_COLUMNS)
-                .withConsoleMode(false)
-        }
-
-        if (patchToRemote) {
-            commandLine = patchCommandLine(commandLine)
-        }
-
-        return commandLine
-    }
-
-    companion object {
-        val MIN_SUPPORTED_TOOLCHAIN = "1.56.0".parseSemVer()
-
-        @JvmOverloads
-        fun suggest(projectDir: Path? = null): GleamToolchainBase? {
-            val distribution = projectDir?.let { WslPath.getDistributionByWindowsUncPath(it.toString()) }
-            val toolchain = distribution
-                ?.getHomePathCandidates()
-                ?.filter { GleamToolchainFlavor.getFlavor(it) != null }
-                ?.mapNotNull { RsToolchainProvider.getToolchain(it.toAbsolutePath()) }
-                ?.firstOrNull()
-            if (toolchain != null) return toolchain
-
-            return GleamToolchainFlavor.getApplicableFlavors()
-                .asSequence()
-                .flatMap { it.suggestHomePaths() }
-                .mapNotNull { RsToolchainProvider.getToolchain(it.toAbsolutePath()) }
-                .firstOrNull()
-        }
-    }
+//    companion object {
+//        val MIN_SUPPORTED_TOOLCHAIN = "1.56.0".parseSemVer()
+//
+//        @JvmOverloads
+//        fun suggest(projectDir: Path? = null): GleamToolchainBase? {
+//            val distribution = projectDir?.let { WslPath.getDistributionByWindowsUncPath(it.toString()) }
+//            val toolchain = distribution
+//                ?.getHomePathCandidates()
+//                ?.filter { GleamToolchainFlavor.getFlavor(it) != null }
+//                ?.mapNotNull { RsToolchainProvider.getToolchain(it.toAbsolutePath()) }
+//                ?.firstOrNull()
+//            if (toolchain != null) return toolchain
+//
+//            return GleamToolchainFlavor.getApplicableFlavors()
+//                .asSequence()
+//                .flatMap { it.suggestHomePaths() }
+//                .mapNotNull { RsToolchainProvider.getToolchain(it.toAbsolutePath()) }
+//                .firstOrNull()
+//        }
+//    }
 }
