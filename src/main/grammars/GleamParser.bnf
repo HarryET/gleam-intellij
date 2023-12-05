@@ -1,4 +1,8 @@
 {
+    generate=[elements="yes" tokens="no"] // this attribute has a QuickDoc for all options (Ctrl-Q/Ctrl-J)
+    parserImports=[
+        "static run.gleam.lang.core.psi.GleamTokens.*"
+    ]
     parserClass='run.gleam.lang.core.parser.GleamParser'
     parserUtilClass='run.gleam.lang.core.parser.GleamParserUtil'
 
@@ -11,100 +15,9 @@
     psiPackage="run.gleam.lang.core.psi"
     psiImplPackage="run.gleam.lang.core.psi.impl"
 
-    elementTypeHolderClass="run.gleam.lang.core.psi.GleamTypes"
+    elementTypeHolderClass="run.gleam.lang.core.psi.GleamElementTypes"
     elementTypeClass="run.gleam.lang.core.psi.GleamElementType"
     tokenTypeClass="run.gleam.lang.core.psi.GleamTokenType"
-
-    tokens = [
-        // Keywords
-        AS= 'as';
-        ASSERT= 'assert';
-        CASE= 'case';
-        CONST= 'const';
-        EXTERNAL= 'external';
-        FN= 'fn';
-        IF= 'if';
-        IMPORT= 'import';
-        LET= 'let';
-        OPAQUE_KW= 'opaque';
-        PANIC='panic'
-        PUB= 'pub';
-        TODO= 'todo';
-        TRY= 'try';
-        TYPE= 'type';
-        USE= 'use';
-        
-        // Unofficial Tokens
-        TRUE= 'True';
-        FALSE= 'False';
-        
-        // Groupings
-        LEFT_PAREN= '(';
-        RIGHT_PAREN= ')';
-        LEFT_SQUARE= '[';
-        RIGHT_SQUARE= ']';
-        LEFT_BRACE= '{';
-        RIGHT_BRACE= '}';
-        
-        // Operators
-        // Int
-        PLUS= '+';
-        MINUS= '-';
-        STAR= '*';
-        SLASH= '/';
-        LESS= '<';
-        GREATER= '>';
-        LESS_EQUAL= '<=';
-        GREATER_EQUAL= '>=';
-        PERCENT= '%';
-        // Float
-        PLUS_DOT= '+.';
-        MINUS_DOT= '-.';
-        STAR_DOT= '*.';
-        SLASH_DOT= '/.';
-        LESS_DOT= '<.';
-        GREATER_DOT= '>.';
-        LESS_EQUAL_DOT= '<=.';
-        GREATER_EQUAL_DOT= '>=.';
-        // String
-        LT_GT= '<>';
-        
-        // Other Punctuation
-        COLON= ':';
-        COMMA= ',';
-        HASH= '#';
-        BANG= '!';
-        EQUAL= '=';
-        EQUAL_EQUAL= '==';
-        NOT_EQUAL= '!=';
-        VBAR= '|';
-        VBAR_VBAR= '||';
-        AMPER_AMPER= '&&';
-        LT_LT= '<<';
-        GT_GT= '>>';
-        PIPE= '|>';
-        DOT= '.';
-        R_ARROW= '->';
-        L_ARROW= '<-';
-        DOT_DOT= '..';
-
-        COMMENT_NORMAL= "regexp://.*"
-        COMMENT_DOC= "regexp:///.*"
-        COMMENT_MODULE= "regexp:////.*"
-        DOWN_NAME= "regexp:[a-z_][_0-9a-z]*"
-        UP_NAME= "regexp:[A-Z][0-9a-zA-Z]*"
-        DISCARD_NAME= "regexp:_[_0-9a-z]*"
-        ID= "<ID>"
-        DECIMAL = "regexp:[0-9][0-9_]*"
-        HEX = "regexp:0x[a-fA-F0-9_]*"
-        OCTAL = "regexp:0o[0-7_]*"
-        BINARY = "regexp:0b[01_]*"
-        INTEGER = "regexp:0b[01_]*|0o[0-7_]*|0x[a-fA-F0-9_]*|[0-9][0-9_]*"
-        WHITE_SPACE = "regexp:\s+"
-        STRING="regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\\"|\\\'|\\)*\")"
-        FLOAT="regexp:[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)"
-    ]
-    generateTokenAccessors=true
 
     extends("(.+expr)") = expr
     extends("(.+call_or_access)") = call_or_access
@@ -119,16 +32,16 @@ source_file ::= (statement | expression_seq | target_group)*;
 // Enforce javascript | erlang with an intellij annotator
 target_group ::= IF (identifier) LEFT_BRACE (statement)* RIGHT_BRACE;
 
-module ::= DOWN_NAME (SLASH DOWN_NAME)*;
+module ::= NAME (SLASH NAME)*;
 unqualified_import
-    ::= DOWN_NAME (AS DOWN_NAME)?
+    ::= NAME (AS NAME)?
     | UP_NAME (AS UP_NAME)?
     ;
 unqualified_imports
     ::= LEFT_BRACE <<comma_separated_list unqualified_import>>? RIGHT_BRACE { pin = 1 }
     ;
 imports
-    ::= IMPORT module (DOT unqualified_imports)? (AS DOWN_NAME)? { pin = 1 }
+    ::= IMPORT module (DOT unqualified_imports)? (AS NAME)? { pin = 1 }
     ;
 
 constant_function_parameter_types
@@ -150,11 +63,11 @@ constant_record_argument::= (label COLON)? constant_value;
 constant_record_arguments::= LEFT_PAREN <<comma_separated_list constant_record_argument>>? RIGHT_PAREN { pin = 1 };
 constant_record ::= (constructor_name | remote_constructor_name) (constant_record_arguments)?;
 
-bit_string_segment_option_size ::= identifier LEFT_PAREN INTEGER RIGHT_PAREN;
-// 'binary' | 'bytes' | 'int' | 'float' | 'bit_string' | 'bits' | 'utf8' | 'utf16' | 'utf32' | 'utf8_codepoint' | 'utf16_codepoint' | 'utf32_codepoint' | 'signed' | 'unsigned' | 'big' | 'little' | 'native' | 'unit' '(' INTEGER ')';
+bit_string_segment_option_size ::= identifier LEFT_PAREN INT RIGHT_PAREN;
+// 'binary' | 'bytes' | 'int' | 'float' | 'bit_string' | 'bits' | 'utf8' | 'utf16' | 'utf32' | 'utf8_codepoint' | 'utf16_codepoint' | 'utf32_codepoint' | 'signed' | 'unsigned' | 'big' | 'little' | 'native' | 'unit' '(' INT ')';
 // enforce value for identifier for these surrounding 2 rules with an intelliJ annotator
 bit_string_named_segment_option::= identifier | bit_string_segment_option_size;
-bit_string_segment_option::= bit_string_named_segment_option | INTEGER;
+bit_string_segment_option::= bit_string_named_segment_option | INT;
 bit_string_segment_options::= bit_string_segment_option (MINUS bit_string_segment_option)*  (MINUS)?;
 constant_bit_string_segment::= constant_value (COLON bit_string_segment_options)?;
 constant_bit_string::= LT_LT <<comma_separated_list constant_bit_string_segment>>? GT_GT { pin = 1 };
@@ -172,14 +85,6 @@ constant_value::= constant_tuple | constant_list | constant_bit_string | constan
 constant ::= (visibility_modifier)? CONST identifier (constant_type_annotation)? EQUAL constant_value
 {
     pin = "identifier"
-    implements = [
-        "run.gleam.lang.core.psi.ext.GleamNamedElement"
-        "run.gleam.lang.core.psi.ext.GleamNameIdentifierOwner"
-        "run.gleam.lang.core.psi.ext.GleamVisibilityOwner"
-    ]
-    extends = "run.gleam.lang.core.psi.ext.GleamStubbedNamedVisibilityElementImpl<?>"
-    stubClass = "run.gleam.lang.core.stubs.GleamConstantStub"
-    elementTypeFactory = "run.gleam.lang.core.stubs.StubImplementationsKt.factory"
 };
 
 type_parameters::= LEFT_PAREN <<comma_separated_list type_param>>? RIGHT_PAREN { pin = 1 };
@@ -210,21 +115,10 @@ function_body::= LEFT_BRACE (expression_seq)? RIGHT_BRACE { pin = 1 };
 function_return_type ::= R_ARROW type_base
 {
     pin = 1
-    extends = "run.gleam.lang.core.psi.ext.GleamStubbedElementImpl<?>"
-    stubClass = "run.gleam.lang.core.stubs.GleamPlaceholderStub<?>"
-    elementTypeFactory = "run.gleam.lang.core.stubs.StubImplementationsKt.factory"
 }
 function::= (visibility_modifier)? FN identifier function_parameters function_return_type? function_body
 {
     pin = 'identifier'
-    implements = [
-        "run.gleam.lang.core.psi.ext.GleamNamedElement"
-        "run.gleam.lang.core.psi.ext.GleamNameIdentifierOwner"
-        "run.gleam.lang.core.psi.ext.GleamVisibilityOwner"
-    ]
-    extends = "run.gleam.lang.core.psi.ext.GleamStubbedNamedVisibilityElementImpl<?>"
-    stubClass = "run.gleam.lang.core.stubs.GleamFunctionStub"
-    elementTypeFactory = "run.gleam.lang.core.stubs.StubImplementationsKt.factory"
 }
 
 list_pattern_tail::= DOT_DOT (identifier | discard)?;
@@ -261,7 +155,7 @@ anonymous_function::= FN anonymous_function_parameters (R_ARROW type_rule)? func
 
 expression_group::= LEFT_BRACE expression_seq RIGHT_BRACE;
 
-case_clause_tuple_access::= identifier DOT INTEGER;
+case_clause_tuple_access::= identifier DOT INT;
 case_clause_guard_unit::= (identifier | case_clause_tuple_access | LEFT_BRACE case_clause_guard_expression RIGHT_BRACE | constant_value) {extends=case_clause_guard_expression};
 case_clause_guard_binary_operator::= VBAR_VBAR | AMPER_AMPER | EQUAL_EQUAL | NOT_EQUAL | LESS | LESS_EQUAL | LESS_DOT
     | LESS_EQUAL_DOT | GREATER | GREATER_EQUAL | GREATER_DOT | GREATER_EQUAL_DOT;
@@ -295,9 +189,9 @@ case_call_or_access ::= case_rule call_or_access_options
 identifier_call_or_access ::= identifier call_or_access_options
 expression_group_call_or_access ::= expression_group call_or_access_options
 record_call_or_access ::= record_expr DOT label
-tuple_call_or_access ::= tuple DOT INTEGER
+tuple_call_or_access ::= tuple DOT INT
 anonymous_function_call_or_access ::= anonymous_function arguments
-call_or_access_options::= arguments | (DOT label) | (DOT INTEGER);
+call_or_access_options::= arguments | (DOT label) | (DOT INT);
 
 // this deviates from the treesitter spec - it is function_call + field_access + tuple_access all in one rule to avoid indirect left recursion
 call_or_access
@@ -309,11 +203,11 @@ call_or_access
      | tuple_call_or_access
      | anonymous_function_call_or_access
 
-any_literal ::= STRING | INTEGER | FLOAT | TRUE | FALSE {
+any_literal ::= STRING | INT | FLOAT | TRUE | FALSE {
     consumeTokenMethod = "consumeTokenFast"
 }
 
-private any_literal_first ::= STRING | INTEGER | FLOAT | TRUE | FALSE
+private any_literal_first ::= STRING | INT | FLOAT | TRUE | FALSE
 
 record_expr ::= (constructor_name | remote_constructor_name) (arguments | record_update)?
 anonymous_function_expr ::= anonymous_function
@@ -413,30 +307,8 @@ data_constructor_arguments::= LEFT_PAREN <<comma_separated_list data_constructor
 data_constructor::= constructor_name (data_constructor_arguments)?;
 data_constructors::= (data_constructor)+;
 
-upper type_definition ::= LEFT_BRACE data_constructors RIGHT_BRACE {
-    pin = 1
-    implements = [
-        "run.gleam.lang.core.psi.ext.GleamNamedElement"
-        "run.gleam.lang.core.psi.ext.GleamNameIdentifierOwner"
-        "run.gleam.lang.core.psi.ext.GleamVisibilityOwner"
-    ]
-    extends = "run.gleam.lang.core.psi.ext.GleamStubbedNamedVisibilityElementImpl<?>"
-    mixin = "run.gleam.lang.core.psi.ext.GleamTypeDefinitionImplMixIn"
-    stubClass = "run.gleam.lang.core.stubs.GleamTypeDefStub"
-    elementTypeFactory = "run.gleam.lang.core.stubs.StubImplementationsKt.factory"
-};
-upper type_alias ::= EQUAL type_rule {
-     pin = 1
-     implements = [
-         "run.gleam.lang.core.psi.ext.GleamNamedElement"
-         "run.gleam.lang.core.psi.ext.GleamNameIdentifierOwner"
-         "run.gleam.lang.core.psi.ext.GleamVisibilityOwner"
-     ]
-     extends = "run.gleam.lang.core.psi.ext.GleamStubbedNamedVisibilityElementImpl<?>"
-     mixin = "run.gleam.lang.core.psi.ext.GleamTypeAliasImplMixIn"
-     stubClass = "run.gleam.lang.core.stubs.GleamTypeAliasStub"
-     elementTypeFactory = "run.gleam.lang.core.stubs.StubImplementationsKt.factory"
-};
+upper type_definition ::= LEFT_BRACE data_constructors RIGHT_BRACE;
+upper type_alias ::= EQUAL type_rule;
 type_statement ::= (visibility_modifier)? (opacity_modifier)? TYPE type_name (type_definition | type_alias) {
     pin = "TYPE"
     elementType = ToBeUpped
@@ -450,22 +322,18 @@ statement
     | function
     ;
 
-visibility_modifier::= PUB {
-    extends = "run.gleam.lang.core.psi.ext.GleamStubbedElementImpl<?>"
-    stubClass = "run.gleam.lang.core.stubs.GleamVisStub"
-    elementTypeFactory = "run.gleam.lang.core.stubs.StubImplementationsKt.factory"
-};
-opacity_modifier::= OPAQUE_KW;
+visibility_modifier::= PUB;
+opacity_modifier::= OPAQUE;
 
 ///// Aliases (maybe not needed by why not have them for now and we can delete later
-identifier::= DOWN_NAME;
+identifier::= NAME;
 constructor_name::= UP_NAME;
 type_identifier::= UP_NAME;
 discard::= DISCARD_NAME;
-label::= DOWN_NAME;
-type_param::= DOWN_NAME;
-type_var::= DOWN_NAME;
-type_hole::= DOWN_NAME;
+label::= NAME;
+type_param::= NAME;
+type_var::= NAME;
+type_hole::= NAME;
 hole::= DISCARD_NAME;
 discard_param::= discard;
 name_param::= identifier;

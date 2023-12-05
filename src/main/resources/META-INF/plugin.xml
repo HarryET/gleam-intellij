@@ -19,7 +19,7 @@
 
         <!-- Parser -->
         <lang.parserDefinition language="Gleam" implementationClass="run.gleam.lang.core.parser.GleamParserDefinition"/>
-        <stubElementTypeHolder class="run.gleam.lang.core.psi.GleamTypes"/>
+<!--        <stubElementTypeHolder class="run.gleam.lang.core.psi.GleamTypes"/>-->
 
         <!-- Syntax Highlighter -->
         <lang.syntaxHighlighter language="Gleam"
@@ -29,9 +29,9 @@
         <colorSettingsPage implementation="run.gleam.ide.colors.GleamColorSettingsPage"/>
 
         <!-- Indices -->
-        <stubIndex implementation="run.gleam.lang.core.stubs.index.GleamNamedElementIndex"/>
+<!--        <stubIndex implementation="run.gleam.lang.core.stubs.index.GleamNamedElementIndex"/>-->
 
         <!-- Navigation -->
-        <gotoSymbolContributor implementation="run.gleam.ide.navigation.GleamSymbolNavigationContributor"/>
+<!--        <gotoSymbolContributor implementation="run.gleam.ide.navigation.GleamSymbolNavigationContributor"/>-->
     </extensions>
 </idea-plugin>

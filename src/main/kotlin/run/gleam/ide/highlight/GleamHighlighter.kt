@@ -5,16 +5,18 @@ import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
 import com.intellij.psi.tree.IElementType
 import run.gleam.ide.colors.GleamColor
-import run.gleam.lang.core.lexer.GleamLexer
-import run.gleam.lang.core.psi.GleamTypes.*
+import run.gleam.lang.core.lexer.GlexerAdapter
+import run.gleam.lang.core.psi.GleamElementTypes.TYPE_IDENTIFIER
+import run.gleam.lang.core.psi.GleamTokens.*
 
 class GleamHighlighter : SyntaxHighlighterBase() {
-    override fun getHighlightingLexer(): Lexer = GleamLexer()
+    override fun getHighlightingLexer(): Lexer = GlexerAdapter()
 
     override fun getTokenHighlights(tokenType: IElementType?): Array<TextAttributesKey> =
-        pack(map(tokenType)?.textAttributesKey)
+        pack(Util.map(tokenType)?.textAttributesKey)
 
-    companion object {
+
+    object Util {
         fun map(tokenType: IElementType?): GleamColor? = when (tokenType) {
             COMMENT_NORMAL -> GleamColor.COMMENT
             COMMENT_DOC -> GleamColor.DOC_COMMENT
@@ -26,4 +28,5 @@ class GleamHighlighter : SyntaxHighlighterBase() {
             else -> null
         }
     }
+
 }

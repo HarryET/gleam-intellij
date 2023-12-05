@@ -15,7 +15,7 @@ import com.intellij.psi.util.descendantsOfType
 import com.intellij.psi.util.prevLeaf
 import com.intellij.util.SmartList
 import run.gleam.lang.core.psi.GleamFile
-import run.gleam.lang.core.stubs.GleamFileStub
+//import run.gleam.lang.core.stubs.GleamFileStub
 import run.gleam.openapiext.document
 
 val PsiFileSystemItem.sourceRoot: VirtualFile?
@@ -69,12 +69,12 @@ val PsiElement.childrenWithLeaves: Sequence<PsiElement>
 /**
  * Extracts node's element type
  */
-val PsiElement.elementType: IElementType
-    get() = elementTypeOrNull!!
+//val PsiElement.elementType: IElementType
+//    get() = elementTypeOrNull!!
 
-val PsiElement.elementTypeOrNull: IElementType?
-    // XXX: be careful not to switch to AST
-    get() = if (this is GleamFile) GleamFileStub.Type else PsiUtilCore.getElementType(this)
+//val PsiElement.elementTypeOrNull: IElementType?
+//    // XXX: be careful not to switch to AST
+//    get() = if (this is GleamFile) GleamFileStub.Type else PsiUtilCore.getElementType(this)
 
 inline fun <reified T : PsiElement> PsiElement.ancestorStrict(): T? =
     PsiTreeUtil.getParentOfType(this, T::class.java, /* strict */ true)
