@@ -35,7 +35,7 @@ target_group ::= IF (identifier) LEFT_BRACE (statement)* RIGHT_BRACE;
 module ::= NAME (SLASH NAME)*;
 unqualified_import
     ::= NAME (AS NAME)?
-    | UP_NAME (AS UP_NAME)?
+    | TYPE? UP_NAME (AS UP_NAME)?
     ;
 unqualified_imports
     ::= LEFT_BRACE <<comma_separated_list unqualified_import>>? RIGHT_BRACE { pin = 1 }
@@ -89,7 +89,6 @@ constant ::= (visibility_modifier)? CONST identifier (constant_type_annotation)?
 
 type_parameters::= LEFT_PAREN <<comma_separated_list type_param>>? RIGHT_PAREN { pin = 1 };
 type_name::= (type_identifier | remote_type_identifier) (type_parameters)?  ;
-external_type::= TYPE type_name { pin = 1 };
 
 function_parameter_types ::= LEFT_PAREN <<comma_separated_list type_base>>? RIGHT_PAREN { pin = 1 };
 tuple_type::= HASH LEFT_PAREN <<comma_separated_list type_base>>? RIGHT_PAREN { pin = 2 };
@@ -102,12 +101,6 @@ type_arguments::= LEFT_PAREN <<comma_separated_list type_argument>>? RIGHT_PAREN
 type_rule::= (type_identifier | remote_type_identifier) (type_arguments)?;
 
 external_function_body::= STRING STRING;
-external_function_parameter::= (identifier COLON)? type_base;
-external_function_parameters::= LEFT_PAREN <<comma_separated_list external_function_parameter>>? RIGHT_PAREN;
-external_function::= FN identifier external_function_parameters function_return_type EQUAL external_function_body { pin = 'identifier' };
-
-external_statement ::= (visibility_modifier)? EXTERNAL (external_function | external_type) { pin = "EXTERNAL" };
-
 function_parameter_args::= labeled_discard_param | discard_param | labeled_name_param | name_param;
 function_parameter::= function_parameter_args (type_annotation)?;
 function_parameters::= LEFT_PAREN <<comma_separated_list function_parameter>>? RIGHT_PAREN { pin = 1 }
@@ -116,7 +109,7 @@ function_return_type ::= R_ARROW type_base
 {
     pin = 1
 }
-function::= (visibility_modifier)? FN identifier function_parameters function_return_type? function_body
+function::= (visibility_modifier)? FN identifier function_parameters function_return_type? ((EQUAL external_function_body) | function_body)?
 {
     pin = 'identifier'
 }
@@ -137,7 +130,7 @@ pattern::= (record_pattern_or_identifier | discard | tuple_pattern | pattern_bit
 try_rule::= TRY pattern (type_annotation)? EQUAL expr { pin = 1 };
 expression_seq::= (expr | try_rule)+;
 
-argument::= (label ':')? (hole | expr);
+argument::= (label COLON)? (hole | expr);
 arguments::= LEFT_PAREN <<comma_separated_list argument>>? RIGHT_PAREN;
 
 expression_bit_string_segment::= unit_expr (COLON bit_string_segment_options)?;
@@ -146,7 +139,7 @@ expression_bit_string::= LT_LT <<comma_separated_list expression_bit_string_segm
 todo_rule::= TODO (LEFT_PAREN STRING RIGHT_PAREN)?;
 panic_rule ::= PANIC;
 tuple::= HASH LEFT_PAREN <<comma_separated_list expr>>? RIGHT_PAREN { pin = 2 }
-list::= LEFT_SQUARE (<<comma_separated_list expr>> ('..' expr)?)? RIGHT_SQUARE { pin = 1 };
+list::= LEFT_SQUARE (<<comma_separated_list expr>> (DOT_DOT expr)?)? RIGHT_SQUARE { pin = 1 };
 
 anonymous_function_parameter_args::= discard_param | name_param;
 anonymous_function_parameter::= anonymous_function_parameter_args (type_annotation)?;
@@ -168,12 +161,13 @@ case_clause_pattern::= <<comma_separated_list pattern>>;
 case_clause_patterns::= case_clause_pattern (VBAR case_clause_pattern)* (VBAR)?;
 case_clause::= case_clause_patterns (case_clause_guard)? R_ARROW expr;
 case_clauses::= (case_clause)+;
-case_subjects::= expression_seq;
-case_body ::= LEFT_BRACE case_clauses RIGHT_BRACE
+case_subjects::= <<comma_separated_list expr>>;
+case_body ::= LEFT_BRACE case_clauses RIGHT_BRACE { pin = 1 };
 case_rule::= CASE case_subjects case_body { pin = 1 };
 
-use_args::= identifier | identifier COMMA use_args;
-use_rule::= USE (use_args)? L_ARROW expr { pin = 1 };
+use_assignment::= pattern (type_annotation)?
+use_assignments::= <<comma_separated_list use_assignment>>
+use_rule::= USE (use_assignments)? L_ARROW expr { pin = 1 };
 
 assignment::= pattern (type_annotation)? EQUAL expr;
 let_rule::= LET assignment { pin = 1 };
@@ -308,18 +302,25 @@ data_constructor::= constructor_name (data_constructor_arguments)?;
 data_constructors::= (data_constructor)+;
 
 upper type_definition ::= LEFT_BRACE data_constructors RIGHT_BRACE;
-upper type_alias ::= EQUAL type_rule;
-type_statement ::= (visibility_modifier)? (opacity_modifier)? TYPE type_name (type_definition | type_alias) {
+upper type_alias ::= EQUAL type_base;
+// if does not have def or alias it is an external type def
+type_statement ::= (visibility_modifier)? (opacity_modifier)? TYPE type_name (type_definition | type_alias)? {
     pin = "TYPE"
     elementType = ToBeUpped
 }
+
+attribute_value ::= constant_value | (label COLON constant_value)
+attribute_arguments ::= LEFT_PAREN <<comma_separated_list attribute_value>>? RIGHT_PAREN;
+attribute ::= AT NAME (arguments | attribute_arguments) {
+    pin = "AT"
+};
 
 statement
     ::= imports
     | constant
     | type_statement
-    | external_statement
     | function
+    | attribute
     ;
 
 visibility_modifier::= PUB;
