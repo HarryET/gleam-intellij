@@ -87,7 +87,6 @@ public class GleamTokens {
     public static final IElementType OPAQUE = new GleamTokenTypeJava("Opaque");
     public static final IElementType PUB = new GleamTokenTypeJava("Pub");
     public static final IElementType TODO = new GleamTokenTypeJava("Todo");
-    public static final IElementType TRY = new GleamTokenTypeJava("Try");
     public static final IElementType TYPE = new GleamTokenTypeJava("Type");
     public static final IElementType USE = new GleamTokenTypeJava("Use");
     public static final IElementType PANIC = new GleamTokenTypeJava("Panic");
@@ -113,7 +112,6 @@ public class GleamTokens {
             OPAQUE,
             PUB,
             TODO,
-            TRY,
             TYPE,
             USE
     );

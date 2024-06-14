@@ -6,7 +6,6 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
 import com.intellij.psi.tree.IElementType
 import run.gleam.ide.colors.GleamColor
 import run.gleam.lang.core.lexer.GlexerAdapter
-import run.gleam.lang.core.psi.GleamElementTypes.TYPE_IDENTIFIER
 import run.gleam.lang.core.psi.GleamTokens.*
 
 class GleamHighlighter : SyntaxHighlighterBase() {
@@ -23,7 +22,7 @@ class GleamHighlighter : SyntaxHighlighterBase() {
             COMMENT_MODULE -> GleamColor.MODULE_COMMENT
             PUB, FN, LET, CASE, IMPORT, TYPE, ASSERT, TODO, CONST, EXTERNAL -> GleamColor.KEYWORD
             STRING -> GleamColor.STRING
-            UP_NAME, TYPE_IDENTIFIER -> GleamColor.TYPE_IDENTIFIER
+            UP_NAME -> GleamColor.TYPE_IDENTIFIER
             // TODO implement highlighting for different parts of code
             else -> null
         }

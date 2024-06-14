@@ -27,23 +27,30 @@
     consumeTokenMethod("((?!.*_with_recover).*_recover)|(.*_first)|(.*expr)") = "consumeTokenFast"
 }
 
-source_file ::= (statement | expression_seq | target_group)*;
+gleam_module ::= definition*
 
-// Enforce javascript | erlang with an intellij annotator
-target_group ::= IF (identifier) LEFT_BRACE (statement)* RIGHT_BRACE;
+private definition_recover ::= !(AT | IMPORT | PUB | CONST | FN | TYPE)
+private definition ::= attribute | g_import | exportable_definition
 
-module ::= NAME (SLASH NAME)*;
-unqualified_import
-    ::= NAME (AS NAME)?
-    | TYPE? UP_NAME (AS UP_NAME)?
-    ;
-unqualified_imports
-    ::= LEFT_BRACE <<comma_separated_list unqualified_import>>? RIGHT_BRACE { pin = 1 }
-    ;
-imports
-    ::= IMPORT module (DOT unqualified_imports)? (AS NAME)? { pin = 1 }
-    ;
+exportable_definition ::= PUB? (constant | function | g_type)
 
+// ATTRIBUTES
+attribute ::= AT attribute_identifier LEFT_PAREN <<comma_separated_list constant_value>> RIGHT_PAREN {
+    pin = 1
+    recoverWhile = definition_recover
+}
+
+// IMPORT STATEMENTS
+type_import ::= TYPE UP_NAME (AS UP_NAME)? { pin = 1 }
+variant_import ::= UP_NAME (AS UP_NAME)? { pin = 1 }
+fn_import ::= NAME (AS NAME)? { pin = 1 }
+unqualified_import ::= type_import | variant_import | fn_import
+g_import ::= IMPORT NAME (SLASH NAME)* (DOT LEFT_BRACE <<comma_separated_list unqualified_import>>? RIGHT_BRACE)? (AS NAME)? {
+    pin = 1
+    recoverWhile = definition_recover
+}
+
+// CONSTANTS
 constant_function_parameter_types
     ::= LEFT_PAREN <<comma_separated_list constant_type_special>>? RIGHT_PAREN { pin = 1 };
 constant_type_function
@@ -82,11 +89,12 @@ constant_type_special
 constant_type_annotation::= COLON constant_type;
 constant_field_access::= identifier DOT label;
 constant_value::= constant_tuple | constant_list | constant_bit_string | constant_record | identifier | constant_field_access | any_literal;
-constant ::= (visibility_modifier)? CONST identifier (constant_type_annotation)? EQUAL constant_value
-{
-    pin = "identifier"
-};
+constant ::= CONST identifier (constant_type_annotation)? EQUAL constant_value {
+    pin = 1
+    recoverWhile = definition_recover
+}
 
+// FUNCTIONS
 type_parameters::= LEFT_PAREN <<comma_separated_list type_param>>? RIGHT_PAREN { pin = 1 };
 type_name::= (type_identifier | remote_type_identifier) (type_parameters)?  ;
 
@@ -100,7 +108,6 @@ type_argument::= type_base;
 type_arguments::= LEFT_PAREN <<comma_separated_list type_argument>>? RIGHT_PAREN { pin = 1 };
 type_rule::= (type_identifier | remote_type_identifier) (type_arguments)?;
 
-external_function_body::= STRING STRING;
 function_parameter_args::= labeled_discard_param | discard_param | labeled_name_param | name_param;
 function_parameter::= function_parameter_args (type_annotation)?;
 function_parameters::= LEFT_PAREN <<comma_separated_list function_parameter>>? RIGHT_PAREN { pin = 1 }
@@ -109,11 +116,38 @@ function_return_type ::= R_ARROW type_base
 {
     pin = 1
 }
-function::= (visibility_modifier)? FN identifier function_parameters function_return_type? ((EQUAL external_function_body) | function_body)?
-{
-    pin = 'identifier'
+function ::= FN identifier function_parameters function_return_type? function_body? {
+    pin = 1
+    recoverWhile = definition_recover
 }
 
+// LAMBDAS
+anonymous_function_parameter_args::= discard_param | name_param;
+anonymous_function_parameter::= anonymous_function_parameter_args (type_annotation)?;
+anonymous_function_parameters::= LEFT_PAREN (<<comma_separated_list anonymous_function_parameter>>)? RIGHT_PAREN;
+anonymous_function::= FN anonymous_function_parameters (R_ARROW type_rule)? function_body;
+
+// PANIC AND TO DO
+panic_rule ::= PANIC (AS STRING)?
+todo_rule ::= TODO (AS STRING)?
+
+tuple::= HASH LEFT_PAREN <<comma_separated_list expr>>? RIGHT_PAREN { pin = 2 }
+list::= LEFT_SQUARE (<<comma_separated_list expr>> (DOT_DOT expr)?)? RIGHT_SQUARE { pin = 1 };
+
+// TYPES
+data_constructor_argument::= (label COLON)? type_base;
+data_constructor_arguments::= LEFT_PAREN <<comma_separated_list data_constructor_argument>>? RIGHT_PAREN { pin = 1 };
+data_constructor::= constructor_name (data_constructor_arguments)?;
+data_constructors::= (data_constructor)+;
+
+upper type_definition ::= LEFT_BRACE data_constructors RIGHT_BRACE { pin = 1 };
+upper type_alias ::= EQUAL type_base { pin = 1 };
+g_type ::= OPAQUE? TYPE type_name (type_definition | type_alias)? {
+    pin = 2
+    recoverWhile = definition_recover
+}
+
+// PATTERN
 list_pattern_tail::= DOT_DOT (identifier | discard)?;
 list_pattern::= LEFT_SQUARE <<comma_separated_list pattern>>? (list_pattern_tail)? RIGHT_SQUARE { pin = 1 };
 
@@ -127,27 +161,109 @@ record_pattern_arguments::= LEFT_PAREN <<comma_separated_list record_pattern_arg
 record_pattern_or_identifier::= (constructor_name | (identifier remote_constructor_name_suffix?)) (record_pattern_arguments)?;
 pattern::= (record_pattern_or_identifier | discard | tuple_pattern | pattern_bit_string | list_pattern | any_literal) (AS identifier)?;
 
-try_rule::= TRY pattern (type_annotation)? EQUAL expr { pin = 1 };
-expression_seq::= (expr | try_rule)+;
+// EXPRESSION SEQUENCES
+argument ::= (label COLON)? (hole | expr);
+arguments ::= LEFT_PAREN <<comma_separated_list argument>>? RIGHT_PAREN;
+expression_bit_string_segment ::= unit_expr (COLON bit_string_segment_options)?;
+expression_bit_string ::= LT_LT <<comma_separated_list expression_bit_string_segment>>? GT_GT { pin = 1 };
 
-argument::= (label COLON)? (hole | expr);
-arguments::= LEFT_PAREN <<comma_separated_list argument>>? RIGHT_PAREN;
+record_expr ::= (constructor_name | remote_constructor_name) (arguments | record_update)?
+anonymous_function_expr ::= anonymous_function
+identifier_expr ::= identifier
+todo_expr ::= todo_rule
+panic_expr ::= panic_rule
+tuple_expr ::= tuple
+list_expr ::= list
+expression_bit_string_expr ::= expression_bit_string
+expression_group_expr ::= expression_group
+case_expr ::= case_rule
+let_expr ::= let_rule
+use_expr ::= use_rule
+assert_expr ::= assert_rule
+negation_expr ::= negation
+call_or_access_expr ::= call_or_access
+expression_literal_expr ::= any_literal
 
-expression_bit_string_segment::= unit_expr (COLON bit_string_segment_options)?;
-expression_bit_string::= LT_LT <<comma_separated_list expression_bit_string_segment>>? GT_GT { pin = 1 };
+unit_expr
+    ::= record_expr
+    | anonymous_function_expr
+    | call_or_access_expr
+    | todo_expr
+    | panic_expr
+    | tuple_expr
+    | list_expr
+    | expression_bit_string_expr
+    | expression_group_expr
+    | case_expr
+    | let_expr
+    | use_expr
+    | assert_expr
+    | negation_expr
+    | expression_literal_expr
+    | identifier_expr
 
-todo_rule::= TODO (LEFT_PAREN STRING RIGHT_PAREN)?;
-panic_rule ::= PANIC;
-tuple::= HASH LEFT_PAREN <<comma_separated_list expr>>? RIGHT_PAREN { pin = 2 }
-list::= LEFT_SQUARE (<<comma_separated_list expr>> (DOT_DOT expr)?)? RIGHT_SQUARE { pin = 1 };
+eqeq_expr ::= expr EQUAL_EQUAL expr
+neq_expr ::= expr NOT_EQUAL expr
+lt_expr ::= expr LESS expr
+leq_expr ::= expr LESS_EQUAL expr
+ltf_expr ::= expr LESS_DOT expr
+lef_expr ::= expr LESS_EQUAL_DOT expr
+gt_expr ::= expr GREATER expr
+geq_expr ::= expr GREATER_EQUAL expr
+gtf_expr ::= expr GREATER_DOT expr
+geqf_expr ::= expr GREATER_EQUAL_DOT expr
+ltgt_expr ::= expr LT_GT expr
+pipe_expr ::= expr PIPE expr
+plus_expr ::= expr PLUS expr
+plusf_expr ::= expr PLUS_DOT expr
+minus_expr ::= expr MINUS expr
+minusf_expr ::= expr MINUS_DOT expr
+star_expr ::= expr STAR expr
+starf_expr ::= expr STAR_DOT expr
+slash_expr ::= expr SLASH expr
+slashf_expr ::= expr SLASH_DOT expr
+percent_expr ::= expr PERCENT expr
+and_expr ::= expr AMPER_AMPER expr
+or_expr ::= expr VBAR_VBAR expr
 
-anonymous_function_parameter_args::= discard_param | name_param;
-anonymous_function_parameter::= anonymous_function_parameter_args (type_annotation)?;
-anonymous_function_parameters::= LEFT_PAREN (<<comma_separated_list anonymous_function_parameter>>)? RIGHT_PAREN;
-anonymous_function::= FN anonymous_function_parameters (R_ARROW type_rule)? function_body;
+// precedence groupings - each group of expressions has equal precedence
+private equality_expr ::= eqeq_expr | neq_expr;
+private gt_lt_expr
+    ::= lt_expr
+    | leq_expr
+    | ltf_expr
+    | lef_expr
+    | gt_expr
+    | gtf_expr
+    | geq_expr
+    | geqf_expr
+private plus_minus_expr
+    ::= plus_expr
+    | plusf_expr
+    | minus_expr
+    | minusf_expr
+private mul_div_mod_concat_expr
+    ::= star_expr
+    | starf_expr
+    | slash_expr
+    | slashf_expr
+    | percent_expr
+    | ltgt_expr
 
-expression_group::= LEFT_BRACE expression_seq RIGHT_BRACE;
+expr
+    ::= unit_expr
+    | or_expr
+    | and_expr
+    | equality_expr
+    | gt_lt_expr
+    | pipe_expr
+    | mul_div_mod_concat_expr
+    | plus_minus_expr
 
+expression_seq ::= expr+
+expression_group ::= LEFT_BRACE expression_seq RIGHT_BRACE;
+
+// CALL OR ACCESS
 case_clause_tuple_access::= identifier DOT INT;
 case_clause_guard_unit::= (identifier | case_clause_tuple_access | LEFT_BRACE case_clause_guard_expression RIGHT_BRACE | constant_value) {extends=case_clause_guard_expression};
 case_clause_guard_binary_operator::= VBAR_VBAR | AMPER_AMPER | EQUAL_EQUAL | NOT_EQUAL | LESS | LESS_EQUAL | LESS_DOT
@@ -197,137 +313,14 @@ call_or_access
      | tuple_call_or_access
      | anonymous_function_call_or_access
 
-any_literal ::= STRING | INT | FLOAT | TRUE | FALSE {
+
+any_literal ::= STRING | INT | FLOAT {
     consumeTokenMethod = "consumeTokenFast"
 }
 
-private any_literal_first ::= STRING | INT | FLOAT | TRUE | FALSE
-
-record_expr ::= (constructor_name | remote_constructor_name) (arguments | record_update)?
-anonymous_function_expr ::= anonymous_function
-identifier_expr ::= identifier
-todo_expr ::= todo_rule
-panic_expr ::= panic_rule
-tuple_expr ::= tuple
-list_expr ::= list
-expression_bit_string_expr ::= expression_bit_string
-expression_group_expr ::= expression_group
-case_expr ::= case_rule
-let_expr ::= let_rule
-use_expr ::= use_rule
-assert_expr ::= assert_rule
-negation_expr ::= negation
-call_or_access_expr ::= call_or_access
-expression_literal_expr ::= any_literal
-
-unit_expr
-    ::= record_expr
-    | anonymous_function_expr
-    | call_or_access_expr
-    | todo_expr
-    | panic_expr
-    | tuple_expr
-    | list_expr
-    | expression_bit_string_expr
-    | expression_group_expr
-    | case_expr
-    | let_expr
-    | use_expr
-    | assert_expr
-    | negation_expr
-    | expression_literal_expr
-    | identifier_expr
-
-eqeq_expr ::= expr EQUAL_EQUAL expr 
-neq_expr ::= expr NOT_EQUAL expr 
-lt_expr ::= expr LESS expr 
-leq_expr ::= expr LESS_EQUAL expr 
-ltf_expr ::= expr LESS_DOT expr 
-lef_expr ::= expr LESS_EQUAL_DOT expr 
-gt_expr ::= expr GREATER expr 
-geq_expr ::= expr GREATER_EQUAL expr 
-gtf_expr ::= expr GREATER_DOT expr 
-geqf_expr ::= expr GREATER_EQUAL_DOT expr 
-ltgt_expr ::= expr LT_GT expr 
-pipe_expr ::= expr PIPE expr 
-plus_expr ::= expr PLUS expr 
-plusf_expr ::= expr PLUS_DOT expr 
-minus_expr ::= expr MINUS expr 
-minusf_expr ::= expr MINUS_DOT expr 
-star_expr ::= expr STAR expr 
-starf_expr ::= expr STAR_DOT expr 
-slash_expr ::= expr SLASH expr 
-slashf_expr ::= expr SLASH_DOT expr 
-percent_expr ::= expr PERCENT expr 
-and_expr ::= expr AMPER_AMPER expr 
-or_expr ::= expr VBAR_VBAR expr 
-
-// precedence groupings - each group of expressions has equal precedence
-private equality_expr ::= eqeq_expr | neq_expr;
-private gt_lt_expr
-    ::= lt_expr
-    | leq_expr
-    | ltf_expr
-    | lef_expr
-    | gt_expr
-    | gtf_expr
-    | geq_expr
-    | geqf_expr
-private plus_minus_expr
-    ::= plus_expr
-    | plusf_expr
-    | minus_expr
-    | minusf_expr
-private mul_div_mod_concat_expr
-    ::= star_expr
-    | starf_expr
-    | slash_expr
-    | slashf_expr
-    | percent_expr
-    | ltgt_expr
-
-expr
-    ::= unit_expr
-    | or_expr
-    | and_expr
-    | equality_expr
-    | gt_lt_expr
-    | pipe_expr
-    | mul_div_mod_concat_expr
-    | plus_minus_expr
-
-data_constructor_argument::= (label COLON)? type_base;
-data_constructor_arguments::= LEFT_PAREN <<comma_separated_list data_constructor_argument>>? RIGHT_PAREN { pin = 1 };
-data_constructor::= constructor_name (data_constructor_arguments)?;
-data_constructors::= (data_constructor)+;
-
-upper type_definition ::= LEFT_BRACE data_constructors RIGHT_BRACE;
-upper type_alias ::= EQUAL type_base;
-// if does not have def or alias it is an external type def
-type_statement ::= (visibility_modifier)? (opacity_modifier)? TYPE type_name (type_definition | type_alias)? {
-    pin = "TYPE"
-    elementType = ToBeUpped
-}
-
-attribute_value ::= constant_value | (label COLON constant_value)
-attribute_arguments ::= LEFT_PAREN <<comma_separated_list attribute_value>>? RIGHT_PAREN;
-attribute ::= AT NAME (arguments | attribute_arguments) {
-    pin = "AT"
-};
-
-statement
-    ::= imports
-    | constant
-    | type_statement
-    | function
-    | attribute
-    ;
-
-visibility_modifier::= PUB;
-opacity_modifier::= OPAQUE;
-
-///// Aliases (maybe not needed by why not have them for now and we can delete later
+/////// Aliases (maybe not needed by why not have them for now and we can delete later
 identifier::= NAME;
+attribute_identifier::= NAME
 constructor_name::= UP_NAME;
 type_identifier::= UP_NAME;
 discard::= DISCARD_NAME;
