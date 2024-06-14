@@ -32,7 +32,8 @@ gleam_module ::= definition*
 private definition_recover ::= !(AT | IMPORT | PUB | CONST | FN | TYPE)
 private definition ::= attribute | g_import | exportable_definition
 
-exportable_definition ::= PUB? (constant | function | g_type)
+private exportable_definition_item ::= g_type | constant | function
+exportable_definition ::= PUB? exportable_definition_item
 
 // ATTRIBUTES
 attribute ::= AT attribute_identifier LEFT_PAREN <<comma_separated_list constant_value>> RIGHT_PAREN {
