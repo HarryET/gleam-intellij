@@ -71,10 +71,9 @@ constant_record_argument::= (label COLON)? constant_value;
 constant_record_arguments::= LEFT_PAREN <<comma_separated_list constant_record_argument>>? RIGHT_PAREN { pin = 1 };
 constant_record ::= (constructor_name | remote_constructor_name) (constant_record_arguments)?;
 
-bit_string_segment_option_size ::= identifier LEFT_PAREN INT RIGHT_PAREN;
 // 'binary' | 'bytes' | 'int' | 'float' | 'bit_string' | 'bits' | 'utf8' | 'utf16' | 'utf32' | 'utf8_codepoint' | 'utf16_codepoint' | 'utf32_codepoint' | 'signed' | 'unsigned' | 'big' | 'little' | 'native' | 'unit' '(' INT ')';
 // enforce value for identifier for these surrounding 2 rules with an intelliJ annotator
-bit_string_named_segment_option::= identifier | bit_string_segment_option_size;
+bit_string_named_segment_option::= identifier (LEFT_PAREN INT RIGHT_PAREN)?;
 bit_string_segment_option::= bit_string_named_segment_option | INT;
 bit_string_segment_options::= bit_string_segment_option (MINUS bit_string_segment_option)*  (MINUS)?;
 constant_bit_string_segment::= constant_value (COLON bit_string_segment_options)?;
@@ -203,7 +202,7 @@ unit_expr
     | expression_literal_expr
     | identifier_expr
 
-eqeq_expr ::= expr EQUAL_EQUAL expr
+eqeq_expr ::= expr EQUAL_EQUAL expr { rightAssociative = true }
 neq_expr ::= expr NOT_EQUAL expr
 lt_expr ::= expr LESS expr
 leq_expr ::= expr LESS_EQUAL expr
@@ -275,8 +274,10 @@ case_clause_guard_expression
     | case_clause_guard_unit;
 case_clause_guard::= IF case_clause_guard_expression;
 case_clause_pattern::= <<comma_separated_list pattern>>;
-case_clause_patterns::= case_clause_pattern (VBAR case_clause_pattern)* (VBAR)?;
-case_clause::= case_clause_patterns (case_clause_guard)? R_ARROW expr;
+case_clause_patterns::= case_clause_pattern (VBAR case_clause_pattern)* (VBAR)?
+case_clause::= case_clause_patterns (case_clause_guard)? R_ARROW expr {
+    pin = 1
+};
 case_clauses::= (case_clause)+;
 case_subjects::= <<comma_separated_list expr>>;
 case_body ::= LEFT_BRACE case_clauses RIGHT_BRACE { pin = 1 };
